@@ -6,6 +6,7 @@ use App\Models\Property;
 use App\Models\PropertyImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log; // Add this line
 
 class PropertyController extends Controller
 {
@@ -65,52 +66,80 @@ class PropertyController extends Controller
 
     public function store(Request $request)
     {
-        // Manual authentication check
-        if (!auth()->check()) {
-            return redirect()->route('login');
-        }
-
-        if (!auth()->user()->isLandlord()) {
-            return redirect()->back()->with('error', 'Only landlords can create properties.');
-        }
-
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'address' => 'required|string|max:255',
-            'city' => 'required|string|max:100',
-            'state' => 'required|string|max:100',
-            'zip_code' => 'required|string|max:20',
-            'country' => 'required|string|max:100',
-            'price_per_night' => 'required|numeric|min:0',
-            'bedrooms' => 'required|integer|min:0',
-            'bathrooms' => 'required|integer|min:0',
-            'max_guests' => 'required|integer|min:1',
-            'property_type' => 'required|string|max:50',
-            'amenities' => 'array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048', // Image validation
+        // Log the request
+        Log::info('Property store request received', [
+            'has_file' => $request->hasFile('image'),
+            'all_inputs' => $request->all()
         ]);
 
-        $validated['landlord_id'] = auth()->id();
-        $validated['amenities'] = $request->amenities ?? [];
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'address' => 'nullable|string',
+            'price' => 'nullable|numeric|min:0',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        ]);
 
-        $property = Property::create($validated);
+        try {
+            $property = new Property();
+            $property->name = $request->name;
+            $property->description = $request->description;
+            $property->address = $request->address;
+            $property->price = $request->price;
 
-        // Handle image uploads
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $index => $image) {
-                $path = $image->store('property_images', 'public');
-                PropertyImage::create([
-                    'property_id' => $property->id,
-                    'image_path' => $path,
-                    'is_main' => $index === 0, // First image is main
+            // Handle image upload - using property_images directory
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                
+                Log::info('Image file info', [
+                    'is_valid' => $image->isValid(),
+                    'original_name' => $image->getClientOriginalName(),
+                    'size' => $image->getSize(),
+                    'mime_type' => $image->getMimeType(),
+                    'extension' => $image->getClientOriginalExtension()
                 ]);
+                
+                if ($image->isValid()) {
+                    $imageName = time() . '_' . $image->getClientOriginalName();
+                    
+                    // Try to store the image
+                    $path = $image->storeAs('public/property_images', $imageName);
+                    
+                    Log::info('Image storage result', [
+                        'path' => $path,
+                        'storage_path' => storage_path('app/public/property_images/' . $imageName)
+                    ]);
+                    
+                    if ($path) {
+                        $property->image = $imageName;
+                        Log::info('Image stored successfully: ' . $imageName);
+                    } else {
+                        Log::error('Failed to store image: ' . $imageName);
+                    }
+                } else {
+                    Log::error('Invalid image file uploaded');
+                }
             }
-        }
 
-        return redirect()->route('properties.show', $property)
-                        ->with('success', 'Property created successfully!');
+            $property->save();
+            Log::info('Property saved successfully', ['property_id' => $property->id]);
+
+            return redirect()->route('properties.index')
+                        ->with('success', 'Property created successfully');
+
+        } catch (\Exception $e) {
+            Log::error('Property creation error: ' . $e->getMessage(), [
+                'exception' => $e,
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            
+            return redirect()->back()
+                        ->with('error', 'Failed to create property: ' . $e->getMessage())
+                        ->withInput();
+        }
     }
+
 
     public function edit(Property $property)
     {
@@ -129,51 +158,53 @@ class PropertyController extends Controller
 
     public function update(Request $request, Property $property)
     {
-        // Manual authentication check
-        if (!auth()->check()) {
-            return redirect()->route('login');
-        }
-
-        if (auth()->id() !== $property->landlord_id) {
-            abort(403, 'You can only edit your own properties.');
-        }
-
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'address' => 'required|string|max:255',
-            'city' => 'required|string|max:100',
-            'state' => 'required|string|max:100',
-            'zip_code' => 'required|string|max:20',
-            'country' => 'required|string|max:100',
-            'price_per_night' => 'required|numeric|min:0',
-            'bedrooms' => 'required|integer|min:0',
-            'bathrooms' => 'required|integer|min:0',
-            'max_guests' => 'required|integer|min:1',
-            'property_type' => 'required|string|max:50',
-            'amenities' => 'array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048', // Image validation
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'address' => 'nullable|string',
+            'price' => 'nullable|numeric|min:0',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        $validated['amenities'] = $request->amenities ?? [];
-        $property->update($validated);
+        try {
+            $property->name = $request->name;
+            $property->description = $request->description;
+            $property->address = $request->address;
+            $property->price = $request->price;
 
-        // Handle new image uploads
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('property_images', 'public');
-                PropertyImage::create([
-                    'property_id' => $property->id,
-                    'image_path' => $path,
-                    'is_main' => false, // New images are not main by default
-                ]);
+            // Handle image update
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                
+                if ($image->isValid()) {
+                    // Delete old image if exists
+                    if ($property->image && Storage::exists('public/images/' . $property->image)) {
+                        Storage::delete('public/images/' . $property->image);
+                    }
+
+                    $imageName = time() . '_' . $image->getClientOriginalName();
+                    $path = $image->storeAs('public/images', $imageName);
+                    
+                    if ($path) {
+                        $property->image = $imageName;
+                    }
+                }
             }
-        }
 
-        return redirect()->route('properties.show', $property)
-                        ->with('success', 'Property updated successfully!');
+            $property->save();
+
+            return redirect()->route('properties.index')
+                           ->with('success', 'Property updated successfully');
+
+        } catch (\Exception $e) {
+            Log::error('Property update error: ' . $e->getMessage());
+            return redirect()->back()
+                           ->with('error', 'Failed to update property. Please try again.')
+                           ->withInput();
+        }
     }
 
+    
     public function destroy(Property $property)
     {
         // Manual authentication check

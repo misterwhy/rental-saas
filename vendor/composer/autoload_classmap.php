@@ -6,7 +6,16 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Http\\Controllers\\AuthController' => $baseDir . '/app/Http/Controllers/AuthController.php',
     'App\\Http\\Controllers\\Controller' => $baseDir . '/app/Http/Controllers/Controller.php',
+    'App\\Http\\Controllers\\DashboardController' => $baseDir . '/app/Http/Controllers/DashboardController.php',
+    'App\\Http\\Controllers\\HomeController' => $baseDir . '/app/Http/Controllers/HomeController.php',
+    'App\\Http\\Controllers\\PropertyController' => $baseDir . '/app/Http/Controllers/PropertyController.php',
+    'App\\Models\\Booking' => $baseDir . '/app/Models/Booking.php',
+    'App\\Models\\Payment' => $baseDir . '/app/Models/Payment.php',
+    'App\\Models\\Property' => $baseDir . '/app/Models/Property.php',
+    'App\\Models\\PropertyImage' => $baseDir . '/app/Models/PropertyImage.php',
+    'App\\Models\\Review' => $baseDir . '/app/Models/Review.php',
     'App\\Models\\User' => $baseDir . '/app/Models/User.php',
     'App\\Providers\\AppServiceProvider' => $baseDir . '/app/Providers/AppServiceProvider.php',
     'Attribute' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
