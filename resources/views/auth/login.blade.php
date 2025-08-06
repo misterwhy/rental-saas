@@ -1,60 +1,98 @@
-@extends('layouts.app')
-
-@section('content')
-<div class="content-wrap">
-    <div class="content-head">
-        <h1>Login</h1>
-    </div>
-
-    <div class="room-grid">
-        <div class="card111">
-            <div class="details111">
-                <form method="POST" action="{{ route('login') }}">
-                    @csrf
-
-                    <div class="mb-3" style="padding: 0 12px;">
-                        <label for="email" class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color); display: block; margin-bottom: 0.3rem;">Email Address</label>
-                        <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus
-                               style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 5px; background-color: var(--info-bg); color: var(--text-color); font-size: 0.9rem;">
-                        @error('email')
-                            <span class="invalid-feedback" role="alert" style="font-size: 0.75rem; color: #ef4444; margin-top: 0.25rem;">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3" style="padding: 0 12px;">
-                        <label for="password" class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color); display: block; margin-bottom: 0.3rem;">Password</label>
-                        <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="current-password"
-                               style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 5px; background-color: var(--info-bg); color: var(--text-color); font-size: 0.9rem;">
-                        @error('password')
-                            <span class="invalid-feedback" role="alert" style="font-size: 0.75rem; color: #ef4444; margin-top: 0.25rem;">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3" style="padding: 0 12px;">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}
-                                   style="margin-right: 0.5rem;">
-                            <label class="form-check-label" for="remember" style="font-size: 0.85rem;">
-                                {{ __('Remember Me') }}
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="mb-3" style="padding: 15px 12px 12px 12px; text-align: center;">
-                        <button type="submit" class="save-btn">Login</button>
-                        @if (Route::has('password.request'))
-                            <a class="edit-btn" href="{{ route('password.request') }}">
-                                {{ __('Forgot Your Password?') }}
-                            </a>
-                        @endif
-                    </div>
-                </form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Property Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
             </div>
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">Welcome back</h1>
+            <p class="text-gray-600">Please sign in to your account</p>
+        </div>
+
+        <!-- Login Form -->
+        <form method="POST" action="{{ route('login') }}" class="space-y-6">
+            @csrf
+            
+            <!-- Email Field -->
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                <input id="email" 
+                       type="email" 
+                       name="email" 
+                       value="{{ old('email') }}" 
+                       required 
+                       autocomplete="email" 
+                       autofocus
+                       class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors @error('email') border-red-300 @enderror">
+                @error('email')
+                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Password Field -->
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                <input id="password" 
+                       type="password" 
+                       name="password" 
+                       required 
+                       autocomplete="current-password"
+                       class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors @error('password') border-red-300 @enderror">
+                @error('password')
+                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Remember Me & Forgot Password -->
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <input id="remember" 
+                           name="remember" 
+                           type="checkbox" 
+                           {{ old('remember') ? 'checked' : '' }}
+                           class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded">
+                    <label for="remember" class="ml-2 text-sm text-gray-600">Remember me</label>
+                </div>
+                @if (Route::has('password.request'))
+                    <a href="{{ route('password.request') }}" class="text-sm text-emerald-600 hover:text-emerald-500">
+                        Forgot password?
+                    </a>
+                @endif
+            </div>
+
+            <!-- Login Button -->
+            <button type="submit" 
+                    class="w-full bg-emerald-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors">
+                Sign in
+            </button>
+        </form>
+
+        <!-- Register Link -->
+        <div class="mt-6 text-center">
+            <p class="text-sm text-gray-600">
+                Don't have an account? 
+                <a href="{{ route('register') }}" class="text-emerald-600 hover:text-emerald-500 font-medium">
+                    Sign up
+                </a>
+            </p>
         </div>
     </div>
-</div>
-@endsection
+</body>
+</html>

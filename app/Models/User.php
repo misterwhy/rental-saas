@@ -1,26 +1,22 @@
 <?php
-// app/Models/User.php
+
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasFactory, Notifiable;
 
     protected $fillable = [
         'name',
         'email',
         'password',
         'phone',
-        'role',
-        'avatar',
-        'status',
-        'email_verified_at'
+        'user_type',
+        'is_active',
     ];
 
     protected $hidden = [
@@ -30,18 +26,17 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
+        'is_active' => 'boolean',
     ];
 
-    // Relationships
     public function properties()
     {
-        return $this->hasMany(Property::class);
+        return $this->hasMany(Property::class, 'landlord_id');
     }
 
     public function bookings()
     {
-        return $this->hasMany(Booking::class);
+        return $this->hasMany(Booking::class, 'tenant_id');
     }
 
     public function reviews()
@@ -49,41 +44,13 @@ class User extends Authenticatable
         return $this->hasMany(Review::class);
     }
 
-    // Scopes
-    public function scopeLandlords($query)
-    {
-        return $query->where('role', 'landlord');
-    }
-
-    public function scopeTenants($query)
-    {
-        return $query->where('role', 'tenant');
-    }
-
-    public function scopeActive($query)
-    {
-        return $query->where('status', 'active');
-    }
-
-    // Accessors
-    public function getFullNameAttribute()
-    {
-        return $this->name;
-    }
-
-    // Methods
     public function isLandlord()
     {
-        return $this->role === 'landlord';
+        return $this->user_type === 'landlord';
     }
 
     public function isTenant()
     {
-        return $this->role === 'tenant';
-    }
-
-    public function isAdmin()
-    {
-        return $this->role === 'admin';
+        return $this->user_type === 'tenant';
     }
 }

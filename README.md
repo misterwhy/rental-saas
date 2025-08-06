@@ -1,25 +1,120 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🏠 House Rental Laravel Project
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A complete Laravel application for house rental management with landlord and tenant functionality.
 
-## About Laravel
+## 🚀 How to Run This Project
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Step 1: Install Prerequisites
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+#### 1. Install PHP 8.2+
+1. Download from: **https://windows.php.net/download/**
+2. Choose **PHP 8.2+** (Thread Safe version)
+3. Extract to `C:\php`
+4. Add `C:\php` to your system PATH:
+   - Press `Win + R`, type `sysdm.cpl`
+   - Go to **Advanced** → **Environment Variables**
+   - Edit **PATH** and add `C:\php`
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+#### 2. Install Composer
+1. Download: **https://getcomposer.org/Composer-Setup.exe**
+2. Run the installer
+
+#### 3. Verify Installation
+```powershell
+php --version
+composer --version
+node --version  # Already installed ✓
+```
+
+### Step 2: Quick Setup (Choose One)
+
+#### Option A: Run Setup Script (Easiest)
+```powershell
+.\setup.ps1
+```
+
+#### Option B: Manual Commands
+```powershell
+# Install dependencies
+composer install
+npm install
+
+# Set up database  
+php artisan migrate
+
+# Build assets
+npm run build
+
+# Create storage link
+php artisan storage:link
+```
+
+### Step 3: Run the Application
+```powershell
+php artisan serve
+```
+
+**Visit: http://localhost:8000**
+
+## ✅ What's Already Configured
+
+Your project is ready with:
+- ✅ **Environment (.env)** - All settings configured
+- ✅ **SQLite Database** - Ready to use
+- ✅ **User Authentication** - Login/Register system
+- ✅ **Property Management** - CRUD operations
+- ✅ **Payment Integration** - Stripe (test mode)
+- ✅ **Image Upload** - Property photos
+- ✅ **Responsive Design** - Tailwind CSS
+
+## 🎯 Project Features
+
+- **Landlord Dashboard** - Manage properties, bookings, payments
+- **Tenant Portal** - Browse properties, make bookings
+- **Property Listings** - Search and filter properties
+- **Booking System** - Calendar-based booking
+- **Payment Processing** - Secure payments via Stripe
+- **Review System** - Property ratings and reviews
+
+## 🔧 Development Commands
+
+```powershell
+# Start development server
+php artisan serve
+
+# Watch frontend changes
+npm run dev
+
+# Clear caches
+php artisan cache:clear
+
+# Run migrations
+php artisan migrate
+
+# Build for production
+npm run build
+```
+
+## 🛠️ Troubleshooting
+
+**"php command not found"**
+- Install PHP and add to PATH (see Step 1)
+
+**Database errors**
+- Run: `php artisan migrate`
+
+**Assets not loading**
+- Run: `npm run build`
+
+**Need fresh start**
+```powershell
+php artisan migrate:fresh
+npm run build
+```
+
+---
+
+🚀 **Ready to go!** After installing PHP and Composer, just run `.\setup.ps1` and then `php artisan serve`
 
 ## Learning Laravel
 

@@ -1,61 +1,46 @@
 <?php
-// app/Models/Property.php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
 
 class Property extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'name', 
-        'slug',
+        'title',
         'description',
         'address',
         'city',
         'state',
+        'zip_code',
         'country',
-        'zipcode',
-        'price',
+        'price_per_night',
         'bedrooms',
         'bathrooms',
-        'area',
-        'type',
-        'status',
-        'featured',
-        'images'
+        'max_guests',
+        'property_type',
+        'amenities',
+        'landlord_id',
+        'is_active',
     ];
 
     protected $casts = [
-        'images' => 'array',
-        'price' => 'decimal:2',
-        'featured' => 'boolean',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'amenities' => 'array',
+        'is_active' => 'boolean',
+        'price_per_night' => 'decimal:2',
     ];
 
-    protected static function boot()
+    public function landlord()
     {
-        parent::boot();
-        
-        static::creating(function ($property) {
-            $property->slug = Str::slug($property->name);
-        });
-        
-        static::updating(function ($property) {
-            $property->slug = Str::slug($property->name);
-        });
+        return $this->belongsTo(User::class, 'landlord_id');
     }
 
-    // Proper relationships
-    public function user()
+    public function images()
     {
-        return $this->belongsTo(User::class);
+        return $this->hasMany(PropertyImage::class);
     }
 
     public function bookings()
@@ -68,35 +53,17 @@ class Property extends Model
         return $this->hasMany(Review::class);
     }
 
-    // Scopes for better querying
-    public function scopeActive($query)
+    public function getAverageRatingAttribute()
     {
-        return $query->where('status', 'active');
+        return $this->reviews()->avg('rating') ?? 0;
     }
 
-    public function scopeFeatured($query)
-    {
-        return $query->where('featured', true);
-    }
-
-    public function scopeByType($query, $type)
-    {
-        return $query->where('type', $type);
-    }
-
-    public function scopeInCity($query, $city)
-    {
-        return $query->where('city', $city);
-    }
-
-    // Accessors
     public function getMainImageAttribute()
     {
-        return $this->images && is_array($this->images) ? $this->images[0] : null;
-    }
-
-    public function getFormattedPriceAttribute()
-    {
-        return '$' . number_format($this->price, 2);
+        $mainImage = $this->images()->where('is_main', true)->first();
+        if (!$mainImage) {
+            $mainImage = $this->images()->first();
+        }
+        return $mainImage ? $mainImage->image_path : null;
     }
 }

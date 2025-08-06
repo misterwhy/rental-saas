@@ -1,4 +1,9 @@
-/* General Resets and Defaults */
+
+
+/* ==========================================================================
+   General Resets and Defaults
+   ========================================================================== */
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -9,41 +14,51 @@ html,
 body {
   width: 100%;
   height: 100%;
-  /* overflow: hidden; Removed to allow natural scrolling */
   font-size: 16px;
   line-height: 1.6;
-  font-family: 'Open Sans', Helvetica, Arial, sans-serif; /* Fallback fonts */
-  background: var(--background-color);
+  font-family: var(--font-primary);
+  background-color: var(--background-color);
   color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* CSS Custom Properties (Variables) - Light Mode Default */
+/* ==========================================================================
+   CSS Custom Properties (Variables)
+   ========================================================================== */
+
 :root {
   /* Colors */
-  --editbtncolor: #99a0b0;
-  --main-bg-color: #f0f2f5;
-  --primary-color: #3b82f6; /* Blue */
-  --hover-color: #2563eb;   /* Darker Blue */
-  --secondary-color: #64748b; /* Gray */
-  --text-color: #1f2937;    /* Dark Gray */
+  --primary-color: #3b82f6;
+  --hover-color: #2563eb;
+  --secondary-color: #64748b;
+  --accent-green: #48a46b;
+  --accent-red: #ff4d4f;
+  --text-color: #1f2937;
   --text-color-secondary: #64748b;
   --background-color: #f5f5fa;
+  --main-bg-color: #f0f2f5;
   --info-bg: #ffffff;
-  --border-color: #e1e1e1;
+  --card-bg: #f7f7f7;
   --sidebar-bg: #ffffff;
+  /* --border-color: #e1e1e1; */
   --sidebar-border: #ede8f0;
-  --card-bg: #F7F7F7;
-  --status-bg: #EDEDED;
-  --button-bg-default: #D9D9D9;
   --button-text-color: #ffffff;
+  --button-bg-default: #d9d9d9;
+  --status-bg: #ededed;
+  --status-green: #48a46b;
+  --status-red: #ef4444;
+  --testcolor: #eae9e3;
 
   /* Shadows */
-  --box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
-  --box-shadow-hover: rgba(0, 0, 0, 0.15) 0px 8px 20px;
+  /* --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --box-shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.15); */
 
   /* Fonts */
   --font-primary: 'Inter', 'Open Sans', sans-serif;
-  --heading-font-size: 1.5rem;
+  --heading-font-size: 1.875rem;
   --subheading-font-size: 1.25rem;
   --body-font-size: 1rem;
   --small-font-size: 0.875rem;
@@ -51,163 +66,86 @@ body {
   /* Spacing & Sizing */
   --sidebar-width: 290px;
   --topbar-height: 80px;
-  --border-radius: 8px;
-  --border-radius-large: 20px;
-  --border-radius-circle: 50%;
+  --border-radius-sm: 0.5rem;
+  --border-radius-md: 8px;
+  --border-radius-lg: 20px;
+  --border-radius-full: 9999px;
 }
 
-/* Body Themes */
-body {
-  background: var(--background-color);
-  color: var(--text-color);
-  font-family: var(--font-primary);
-  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for dark mode */
-}
+/* ==========================================================================
+   Dark Mode
+   ========================================================================== */
 
-/* ------------------------------------- Dark Mode ---------------------------------------------- */
-/* Dark Mode Variables */
 body.dark-mode {
   --background-color: #1e1e2d;
+  --main-bg-color: #1a1a28;
+  --info-bg: #2a2a3b;
+  --card-bg: #252536;
+  --sidebar-bg: #2a2a3b;
   --text-color: #c5c6c7;
   --text-color-secondary: #9ca3af;
-  --main-bg-color: #1a1a28; /* Slightly darker than background */
-  --info-bg: #2a2a3b;
-  --sidebar-bg: #2a2a3b;
-  --card-bg: #252536;
-  --status-bg: #333345;
   --border-color: #3a3a4a;
   --sidebar-border: #3a3a4a;
-  --box-shadow: rgba(0, 0, 0, 0.2) 0px 6px 15px;
-  --box-shadow-hover: rgba(0, 0, 0, 0.3) 0px 10px 25px;
+  --box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  --box-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
 
-/* Ensure elements use dark mode variables */
-body.dark-mode .menu-wrap,
-body.dark-mode .dashboard-item {
-  background-color: var(--sidebar-bg);
-  color: var(--text-color);
-  box-shadow: var(--box-shadow);
-}
+/* ==========================================================================
+   Layout: Dashboard
+   ========================================================================== */
 
-body.dark-mode .search-wrap {
-  background-color: var(--background-color);
-  color: var(--text-color);
-}
-/* --------------------------------------------------------------------------------------------- */
-
-
-/* Layout: Dashboard */
 .dashboard {
   display: grid;
   width: 100%;
-  height: 100vh; /* Use viewport height */
-  grid-template-columns: var(--sidebar-width) auto;
-  grid-template-rows: var(--topbar-height) auto;
+  height: 100vh;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  grid-template-rows: var(--topbar-height) 1fr;
   grid-template-areas:
     'menu search'
     'menu content';
 }
 
-/* Layout: Search Wrap */
-.search-wrap {
-  grid-area: search;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 2em;
-  background-color: var(--background-color); /* Ensure background matches theme */
-  border-bottom: 1px solid var(--border-color); /* Add bottom border */
-}
+/* ==========================================================================
+   Navigation Menu
+   ========================================================================== */
 
-.search-wrap .search {
-  display: flex; /* Changed from align-items to display flex for better control */
-  align-items: center;
-  width: 60%;
-  height: 100%; /* Take full height of the search-wrap row */
-}
-
-.search-wrap .search label {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  height: calc(100% - 16px); /* Account for margin */
-  margin: 8px 0; /* Vertical margin */
-}
-
-.iconB1 {
-  fill: var(--secondary-color);
-  background-color: var(--info-bg);
-  border-radius: var(--border-radius-circle);
-  flex-shrink: 0; /* Prevent icon from shrinking */
-}
-
-.search-wrap .search label input {
-  display: block;
-  padding: 0.5em 1em; /* More standard padding */
-  width: 100%;
-  margin-left: 8px; /* Space between icon and input */
-  border: 1px solid var(--border-color);
-  border-radius: 20px;
-  background: var(--info-bg);
-  color: var(--text-color); /* Ensure text is visible */
-  transition: border-color 0.3s, box-shadow 0.3s ease;
-  font-family: inherit; /* Inherit font */
-}
-
-.search-wrap .search label input:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.25); /* Use primary color with alpha */
-  outline: none;
-}
-
-.search-wrap .user-actions {
-  display: flex;
-  align-items: center;
-  /* fill: #f5f5fa; Removed, use color variables */
-  height: 50px;
-  /* Add icons or user actions here */
-}
-
-/* Layout: Menu */
 .menu-wrap {
   grid-area: menu;
-  padding-bottom: 3em;
-  overflow: auto;
-  background: var(--sidebar-bg);
+  background-color: var(--sidebar-bg);
   border-right: 1px solid var(--sidebar-border);
-  /* Ensure it scrolls if content overflows */
+  overflow-y: auto;
+  padding-bottom: 3em;
 }
 
 .menu-wrap .user {
-  height: var(--topbar-height);
   display: flex;
   align-items: center;
-  margin: 0;
+  height: var(--topbar-height);
   padding: 0 3em;
+  gap: 1em;
 }
 
-.menu-wrap .user .user-avatar {
+.user-avatar {
   width: 40px;
   height: 40px;
-  border-radius: var(--border-radius-circle);
+  flex-shrink: 0;
+  border-radius: 50%;
   overflow: hidden;
-  flex-shrink: 0; /* Prevent avatar from shrinking */
 }
 
-.menu-wrap .user .user-avatar img {
+.user-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
 .menu-wrap .user figcaption {
-  padding-left: 1em;
   font-weight: 700;
   font-size: var(--small-font-size);
-  color: var(--text-color); /* Ensure text color */
-  white-space: nowrap; /* Prevent name from wrapping */
+  color: var(--text-color);
+  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis; /* Add ellipsis if name is too long */
+  text-overflow: ellipsis;
 }
 
 .menu-wrap nav {
@@ -216,11 +154,10 @@ body.dark-mode .search-wrap {
 
 .menu-wrap nav section {
   padding-top: 3em;
-  /* margin-left: -20px; Removed negative margin */
 }
 
 .menu-wrap nav h3 {
-  margin: 0 0 0.5em 0; /* Top, Right, Bottom, Left */
+  margin: 0 0 0.5em;
   font-size: var(--small-font-size);
   text-transform: uppercase;
   color: var(--primary-color);
@@ -228,8 +165,6 @@ body.dark-mode .search-wrap {
 }
 
 .menu-wrap nav ul {
-  padding: 0;
-  margin: 0;
   list-style: none;
 }
 
@@ -237,112 +172,170 @@ body.dark-mode .search-wrap {
   margin-top: 1em;
 }
 
-.menu-wrap nav li a {
+.menu-wrap nav a {
   display: flex;
   align-items: center;
+  gap: 1rem;
+  padding: 10px 15px;
+  border-radius: var(--border-radius-sm);
   text-decoration: none;
-  font-weight: 600; /* Slightly bolder */
+  font-weight: 600;
   font-size: var(--small-font-size);
-  color: var(--text-color-secondary); /* Default link color */
-  transition: color 0.15s ease, background-color 0.3s ease; /* Added bg transition */
-  padding: 10px 15px; /* Increased padding for better click area */
-  border-radius: var(--border-radius);
+  color: var(--text-color-secondary);
+  transition: color 0.15s ease, background-color 0.3s ease;
 }
 
-.menu-wrap nav li a svg {
-  margin-right: 1em;
-  fill: var(--text-color-secondary); /* Default icon color */
-  flex-shrink: 0; /* Prevent icon from shrinking */
+.menu-wrap nav a svg {
+  fill: var(--text-color-secondary);
+  flex-shrink: 0;
   transition: fill 0.15s ease;
-  width: 20px; /* Explicit width */
-  height: 20px; /* Explicit height */
+  width: 20px;
+  height: 20px;
 }
 
-/* Hover State */
-.menu-wrap nav li a:hover {
-  color: #ffffff;
-  background-color: var(--primary-color);
+.menu-wrap nav a:hover,
+.menu-wrap nav a.active {
+  color: var(--accent-green);
+  background-color: var(--main-bg-color);
 }
 
-.menu-wrap nav li a:hover svg {
-  fill: #ffffff;
+.menu-wrap nav a:hover svg,
+.menu-wrap nav a.active svg {
+  fill: var(--accent-green);
 }
 
-/* Active State */
-.menu-wrap nav li a.active {
-  color: var(--primary-color);
-  background-color: rgba(59, 130, 246, 0.1); /* Light blue background */
+/* ==========================================================================
+   Search Bar
+   ========================================================================== */
+
+.search-wrap {
+  grid-area: search;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2em;
+  background-color: var(--background-color);
+  border-bottom: 1px solid var(--border-color);
 }
 
-.menu-wrap nav li a.active svg {
-  fill: var(--primary-color);
+.search-wrap .search {
+  display: flex;
+  align-items: center;
+  width: 60%;
+  height: 100%;
 }
 
-/* Layout: Content Wrap */
+.search-wrap .search label {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  height: calc(100% - 16px);
+  margin: 8px 0;
+}
+
+.search-wrap .search label .icon {
+  position: absolute;
+  left: 1rem;
+  color: var(--secondary-color);
+  width: 18px;
+  height: 18px;
+}
+
+.search-wrap .search label input {
+  display: block;
+  width: 100%;
+  padding: 0.5em 1em 0.5em 2.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-full);
+  background: var(--info-bg);
+  color: var(--text-color);
+  font-family: inherit;
+  transition: border-color 0.3s, box-shadow 0.3s ease;
+}
+
+.search-wrap .search label input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
+  outline: none;
+}
+
+.search-wrap .user-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  height: 50px;
+}
+
+/* ==========================================================================
+   Content Area
+   ========================================================================== */
+
 .content-wrap {
   grid-area: content;
-  padding: 2em 3em; /* Adjusted padding */
-  overflow: auto; /* Allow scrolling for content */
-  background-color: var(--background-color); /* Match body background */
-  height: calc(100vh - var(--topbar-height)); /* Full height minus topbar */
+  background-color: var(--background-color);
+  padding: 2em 3em;
+  overflow-y: auto;
 }
 
 .content-wrap .content-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 2em; /* Increased margin */
-  flex-wrap: wrap; /* Allow wrapping on small screens */
-  gap: 1em; /* Space between title and buttons */
+  margin-bottom: 2em;
+  flex-wrap: wrap;
+  gap: 1em;
 }
 
 .content-wrap .content-head h1 {
   font-size: var(--heading-font-size);
-  color: var(--text-color); /* Use theme text color */
-  font-weight: 600; /* Slightly bolder */
+  color: var(--text-color);
+  font-weight: 700;
   margin: 0;
-  flex-grow: 1; /* Allow title to grow */
+  flex-grow: 1;
 }
 
-/* Buttons in content head */
 .content-wrap .content-head .action {
   display: flex;
-  gap: 0.5em; /* Space between buttons */
-  flex-wrap: wrap; /* Wrap buttons if needed */
+  gap: 0.5em;
+  flex-wrap: wrap;
 }
 
-/* Info Boxes */
+/* ==========================================================================
+   Info Boxes
+   ========================================================================== */
+
 .info-boxes {
   display: flex;
   justify-content: center;
-  align-items: stretch; /* Stretch to match height */
+  align-items: stretch;
   gap: 20px;
   flex-wrap: wrap;
-  margin-bottom: 2em; /* Space below info boxes */
+  margin-bottom: 2em;
 }
 
 .info-box {
-  background: var(--info-bg);
-  box-shadow: var(--box-shadow);
-  border-radius: var(--border-radius-large);
-  /* height: 120px; Removed fixed height for flexibility */
   display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: 1.2em; /* Consistent padding */
-  transition: all 0.3s ease, transform 0.2s;
-  width: calc(25% - 15px); /* Adjusted for 4 boxes per row */
-  min-width: 200px; /* Minimum width */
-  flex-direction: column; /* Stack icon and content vertically */
-  justify-content: center; /* Center content vertically */
+  justify-content: center;
+  width: calc(25% - 15px);
+  min-width: 200px;
+  padding: 1.2em;
+  background-color: var(--info-bg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--box-shadow);
+  text-align: center;
+  transition: all 0.3s ease;
 }
 
 .info-box:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--box-shadow-hover);
+  transform: translateY(-5px);
+  box-shadow: var(--box-shadow-hover);
 }
 
 .info-box .box-icon {
-  margin-bottom: 0.8em; /* Space between icon and text */
+  margin-bottom: 0.8em;
 }
 
 .info-box .box-icon svg {
@@ -351,40 +344,36 @@ body.dark-mode .search-wrap {
   fill: var(--text-color-secondary);
 }
 
-.info-box.active svg {
+.info-box.active .box-icon svg {
   fill: var(--primary-color);
 }
 
-.info-box .box-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  color: var(--text-color); /* Ensure text color */
-}
-
 .info-box .box-content .big {
-  font-size: 1.8rem; /* Larger font size */
-  font-weight: 700; /* Bolder */
-  margin-bottom: 0.2em; /* Space below big number */
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.2em;
+  color: var(--text-color);
 }
 
 .info-box .box-content .small {
   font-size: var(--small-font-size);
-  color: var(--text-color-secondary); /* Softer color for label */
+  color: var(--text-color-secondary);
 }
 
-/* Dashboard Grid Layout (for charts, stats, etc.) */
+/* ==========================================================================
+   Dashboard Grid and Components
+   ========================================================================== */
+
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid */
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
   margin-top: 2em;
 }
 
 .dashboard-item {
   background-color: var(--info-bg);
-  border-radius: var(--border-radius-large);
+  border-radius: var(--border-radius-lg);
   box-shadow: var(--box-shadow);
   padding: 20px;
   text-align: center;
@@ -398,124 +387,234 @@ body.dark-mode .search-wrap {
 
 .chart-container {
   width: 100%;
-  max-width: 300px; /* Limit chart width */
+  max-width: 300px;
   margin: 0 auto;
   animation: fadeIn 1.2s ease-in-out forwards;
 }
 
-@keyframes fadeIn {
-  0% { opacity: 0; transform: scale(0.9); }
-  100% { opacity: 1; transform: scale(1); }
+/* ==========================================================================
+   Property Cards
+   ========================================================================== */
+
+.room-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 30px;
+  padding: 20px 0;
+  justify-items: center;
 }
 
-/* Custom Scrollbars */
-::-webkit-scrollbar {
-  width: 8px; /* Slightly wider */
-  height: 8px; /* For horizontal scrollbars */
+.property-card {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--box-shadow);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-::-webkit-scrollbar-thumb {
-  background: var(--primary-color);
-  border-radius: 4px;
+.property-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--box-shadow-hover);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--hover-color);
+.card-header {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
 }
 
-::-webkit-scrollbar-track {
-  background: var(--main-bg-color); /* Use main background color */
+.card-header img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
 }
 
-/* -------------------------------------------------------------------------------------- */
-/* General Button Styling */
-/* Base button styles */
-button, .btn {
+.property-card:hover .card-header img {
+  transform: scale(1.05);
+}
+
+.card-header-text {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--border-radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.card-details {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 1.5rem;
+}
+
+.property-address {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-color);
+}
+
+.room-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  color: var(--text-color-secondary);
+}
+
+.room-type,
+.room-price {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.room-type {
+  font-weight: bold;
+  font-size: 0.875rem;
+  color: var(--text-color);
+}
+
+.room-info svg {
+  width: 18px;
+  height: 18px;
+  fill: var(--text-color-secondary);
+  flex-shrink: 0;
+}
+
+.room-price .price-value {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--accent-green);
+}
+
+.user-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.875rem;
+  color: var(--text-color-secondary);
+}
+
+.user-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-info svg {
+  width: 18px;
+  height: 18px;
+  fill: var(--text-color-secondary);
+}
+
+.user-name-text {
+  font-weight: 500;
+}
+
+.status-text {
+  font-weight: 600;
+  color: var(--accent-green);
+}
+
+.editing-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 15px;
+  background-color: var(--info-bg);
+  border-top: 1px solid var(--border-color);
+}
+
+.view-details-btn {
+  width: 100%;
+  max-width: 150px;
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: var(--border-radius-sm);
+  background-color: var(--accent-green);
+  color: var(--button-text-color);
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.view-details-btn:hover {
+  background-color: #3b8756;
+  transform: translateY(-3px);
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
   padding: 10px 20px;
   border: none;
-  border-radius: var(--border-radius);
+  border-radius: var(--border-radius-md);
   font-size: var(--small-font-size);
   font-weight: 600;
   cursor: pointer;
+  text-decoration: none;
+  font-family: inherit;
   transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  display: inline-flex; /* Allow icons */
-  align-items: center;
-  justify-content: center;
-  gap: 0.5em; /* Space between icon and text */
-  text-decoration: none; /* For links styled as buttons */
-  font-family: inherit; /* Inherit font */
 }
 
-button:hover, .btn:hover {
+.btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-button:active, .btn:active {
+.btn:active {
   transform: translateY(0);
 }
 
-/* Edit Button */
-.edit-btn, .btn-secondary {
+.btn-primary {
+  background-color: var(--primary-color);
+  color: var(--button-text-color);
+}
+
+.btn-primary:hover {
+  background-color: var(--hover-color);
+}
+
+.btn-secondary {
   background-color: var(--button-bg-default);
   color: var(--button-text-color);
-  border-radius: 20px;
-  padding: 10px 20px;
-  font-size: 13px;
-  font-weight: 600;
 }
 
-.edit-btn:hover, .btn-secondary:hover {
+.btn-secondary:hover {
   background-color: var(--primary-color);
 }
 
-/* Save Button */
-.save-btn, .btn-primary {
-  background-color: var(--primary-color);
+.btn-danger {
+  background-color: var(--accent-red);
   color: var(--button-text-color);
-  border-radius: 20px;
-  padding: 10px 20px;
-  font-size: 13px;
-  font-weight: 600;
 }
 
-.save-btn:hover, .btn-primary:hover {
-  background-color: var(--hover-color);
+.btn-danger:hover {
+  background-color: #dc2626;
 }
 
-/* Delete Button */
-.delete-btn, .btn-danger {
-  background-color: #ef4444; /* Red */
-  color: var(--button-text-color);
-  border-radius: 20px;
-  padding: 10px 20px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.delete-btn:hover, .btn-danger:hover {
-  background-color: #dc2626; /* Darker Red */
-}
-
-/* Specific button overrides if needed */
-.btn.btn-primary {
-  background-color: var(--primary-color);
-  color: var(--button-text-color);
-  border: none;
-  padding: 10px 20px;
-  border-radius: var(--border-radius);
-  font-size: var(--small-font-size);
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.btn.btn-primary:hover {
-  background-color: var(--hover-color);
-  transform: translateY(-2px);
-}
-
-/* Info Box Buttons */
 .info-box-buttons {
   display: flex;
   justify-content: center;
@@ -530,204 +629,122 @@ button:active, .btn:active {
   border-radius: 15px;
 }
 
+/* ==========================================================================
+   Utility Classes
+   ========================================================================== */
 
-/* ---------------------------------------------------------------------------------------------------------------------------------- */
-/* ---------------------------------------------------------------------------------------------------------------------------------- */
-/* ---------------------------------------------------------------------------------------------------------------------------------- */
-/* Property Cards (Room Grid) */
-.room-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* Responsive grid */
-  gap: 30px; /* Space between cards */
-  padding: 20px 0; /* Padding top and bottom */
-  justify-items: center; /* Center cards in grid tracks */
-}
-
-.card111 {
-  width: 100%;
-  max-width: 320px; /* Max width */
+.d-flex {
   display: flex;
-  flex-direction: column;
-  background-color: var(--card-bg);
-  border-radius: var(--border-radius-large);
-  box-shadow: var(--box-shadow);
-  overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.card111:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--box-shadow-hover);
+.justify-content-center {
+  justify-content: center;
 }
 
-/* Card Header */
-.header111 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 16px 8px 16px; /* Top, Right, Bottom, Left */
-}
-
-.header-text111 {
-  font-size: 16px;
-  font-weight: bold;
-  color: var(--text-color-secondary);
-}
-
-/* Card Image */
-.image-placeholder111 {
-  height: 160px; /* Slightly taller */
-  padding: 10px;
-  background-color: #e0e0e0; /* Placeholder background */
-}
-
-.image-placeholder111 img {
-  border-radius: var(--border-radius-large);
+.no-image {
+  background-color: #e0e0e0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-}
-
-/* Card Details */
-.details111 {
-  padding: 0 12px 12px 12px;
-  flex-grow: 1; /* Allow details to grow */
   display: flex;
-  flex-direction: column;
-}
-
-/* Room Info */
-.room-info111 {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 12px;
-}
-
-.room-type111 {
-  font-weight: bold;
-  font-size: 14px; /* Slightly larger */
-  color: var(--text-color);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.bed-icon111 {
-  fill: var(--text-color);
-  width: 20px;
-  height: 20px;
-}
-
-.price1112 {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.price11 {
-  fill: var(--text-color-secondary);
-  width: 16px;
-  height: 16px;
-}
-
-.price111 {
-  font-weight: bold;
-  font-size: 16px; /* Slightly larger */
-  color: var(--text-color);
-}
-
-/* User Info / Status */
-.user-info111 {
-  display: flex;
-  align-items: center;
-  margin-top: 15px; /* Space above */
-  padding-top: 10px; /* Padding inside */
-  border-top: 1px solid var(--border-color); /* Separator line */
-}
-
-.user-name111 {
-  display: flex;
-  align-items: center;
-  gap: 6px; /* Space between icon and name */
-}
-
-.user-name1 {
-  font-size: 14px;
-  font-weight: 500; /* Medium weight */
-  color: var(--text-color);
-}
-
-.user-name11 {
-  fill: var(--text-color-secondary);
-  width: 16px;
-  height: 16px;
-}
-
-.status111 {
-  display: flex;
-  margin-left: auto; /* Push to the right */
   align-items: center;
   justify-content: center;
-  border-top-left-radius: 20px;
-  border-bottom-left-radius: 20px;
-  background-color: var(--status-bg);
-  padding: 5px 10px;
-  font-size: 12px;
-  font-weight: 600;
+  color: #999;
+}
+
+.iconB1,
+.bed-icon,
+.price-icon,
+.user-icon {
+  fill: var(--text-color-secondary);
+}
+
+.dashboard-card {
+  background-color: var(--info-bg);
+  border-radius: var(--border-radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+}
+
+.sidebar-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.metric-badge {
+  background: var(--main-bg-color);
   color: var(--text-color-secondary);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
 }
 
-/* Card Actions (Editing Buttons) */
-.editing-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 10px; /* Space between buttons */
-  padding: 15px; /* Padding around buttons */
-  background-color: var(--info-bg); /* Background for button area */
-  border-top: 1px solid var(--border-color); /* Separator */
+.metric-badge.positive {
+  background: #dcfce7;
+  color: #16a34a;
 }
 
-.editing-buttons1, .editing-buttons2 {
-  flex: 1; /* Allow buttons to grow */
-  max-width: 150px; /* Max width */
-  padding: 10px;
-  font-size: 13px;
-  font-weight: 600;
-  border-radius: 20px;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.3s;
+.metric-badge.negative {
+  background: #fee2e2;
+  color: #dc2626;
 }
 
-.editing-buttons1 {
-  background-color: var(--button-bg-default);
-  color: var(--button-text-color);
+.nav-active {
+  background: #1f2937;
+  color: white;
 }
 
-.editing-buttons1:hover {
-  background-color: var(--primary-color);
-  transform: translateY(-3px);
+.nav-active .sidebar-icon,
+.nav-active span {
+  color: white;
 }
 
-.editing-buttons2 {
-  background-color: var(--button-bg-default);
-  color: var(--button-text-color);
+/* ==========================================================================
+   Animations
+   ========================================================================== */
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-.editing-buttons2:hover {
-  background-color: #bc4949; /* Red */
-  transform: translateY(-3px);
+/* ==========================================================================
+   Custom Scrollbars
+   ========================================================================== */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
+::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
 
-/* ---------------------------------------------------------------------------------------------------------------------------------- */
-/* Responsive Layout */
-/* Tablets */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--hover-color);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--main-bg-color);
+}
+
+/* ==========================================================================
+   Responsive Layout
+   ========================================================================== */
+
 @media (max-width: 768px) {
   .dashboard {
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto; /* Menu, Search, Content */
+    grid-template-rows: auto auto auto;
     grid-template-areas:
       'menu'
       'search'
@@ -736,9 +753,17 @@ button:active, .btn:active {
   }
 
   .menu-wrap {
-    /* display: none;  Keep sidebar, maybe make it collapsible */
     border-right: none;
     border-bottom: 1px solid var(--sidebar-border);
+    padding: 0 1em 2em 1em;
+  }
+
+  .menu-wrap .user {
+    padding: 0 1em;
+  }
+
+  .menu-wrap nav {
+    padding: 0 1em;
   }
 
   .search-wrap {
@@ -775,26 +800,13 @@ button:active, .btn:active {
   }
 }
 
-/* Mobile */
 @media (max-width: 480px) {
-  .dashboard {
-    padding: 0 5px;
-  }
-
-  .content-wrap {
-    padding: 1em;
-  }
-
   body {
     font-size: 14px;
   }
 
-  .menu-wrap {
-    padding: 0 1em 2em 1em;
-  }
-
-  .menu-wrap nav {
-    padding: 0 1em;
+  .content-wrap {
+    padding: 1em;
   }
 
   .search-wrap {
@@ -823,7 +835,7 @@ button:active, .btn:active {
     gap: 20px;
   }
 
-  .card111 {
+  .property-card {
     max-width: 100%;
   }
 
@@ -832,7 +844,7 @@ button:active, .btn:active {
     gap: 8px;
   }
 
-  .editing-buttons1, .editing-buttons2 {
+  .view-details-btn {
     max-width: 100%;
   }
 }
