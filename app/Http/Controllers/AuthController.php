@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
+use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -17,21 +16,21 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
         ]);
 
-        $credentials = $request->only('email', 'password');
-
-        if (Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-            return redirect()->intended('/');
+
+            // Optional: Redirect to intended page or dashboard
+            return redirect()->intended(route('dashboard', absolute: false));
         }
 
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records.',
-        ]);
+        ])->onlyInput('email');
     }
 
     public function showRegisterForm()
@@ -41,33 +40,40 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'phone' => 'nullable|string|max:20',
-            'user_type' => ['required', Rule::in(['landlord', 'tenant'])],
+        // Validate all required fields, including user_type
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'phone' => ['nullable', 'string', 'max:20'], // Validate phone if provided
+            'user_type' => ['required', 'string', 'in:landlord,tenant'], // Validate user_type
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
+        // Create the user, including user_type and phone (if provided)
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'phone' => $request->phone,
-            'user_type' => $request->user_type,
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null, // Use null if phone is not provided
+            'user_type' => $validated['user_type'], // Include user_type
+            'password' => Hash::make($validated['password']),
         ]);
 
+        // Log the user in automatically after registration
         Auth::login($user);
 
-        return redirect('/')->with('success', 'Registration successful!');
+        // Redirect to the dashboard after successful registration
+        return redirect()->route('dashboard');
     }
 
     public function logout(Request $request)
     {
         Auth::logout();
+
+        // Invalidate the session and regenerate the CSRF token
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/')->with('success', 'You have been logged out.');
+        // Redirect to the homepage after logout
+        return redirect('/');
     }
 }

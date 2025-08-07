@@ -13,45 +13,20 @@ class PropertyFactory extends Factory
     public function definition(): array
     {
         return [
-            'title' => $this->faker->sentence(3),
-            'description' => $this->faker->paragraph(4),
-            'address' => $this->faker->streetAddress(),
-            'city' => $this->faker->city(),
-            'state' => $this->faker->stateAbbr(),
-            'zip_code' => $this->faker->postcode(),
-            'country' => 'USA',
-            'price_per_night' => $this->faker->randomFloat(2, 50, 500),
-            'bedrooms' => $this->faker->numberBetween(1, 6),
-            'bathrooms' => $this->faker->numberBetween(1, 4),
-            'max_guests' => $this->faker->numberBetween(2, 12),
-            'property_type' => $this->faker->randomElement(['house', 'apartment', 'condo', 'villa']),
-            'amenities' => $this->faker->randomElements(
-                ['wifi', 'pool', 'parking', 'gym', 'spa', 'kitchen', 'laundry', 'balcony'],
-                $this->faker->numberBetween(1, 5)
-            ),
-            'landlord_id' => User::factory()->landlord(),
-            'is_active' => true,
+            'owner_id' => User::factory(),
+            'name' => $this->faker->company . ' Property',
+            'address' => $this->faker->streetAddress,
+            'city' => $this->faker->city,
+            'state' => $this->faker->state,
+            'zip_code' => $this->faker->postcode,
+            'country' => $this->faker->country,
+            'property_type' => $this->faker->randomElement(['Residential', 'Commercial', 'HOA']),
+            'number_of_units' => $this->faker->numberBetween(1, 20),
+            'purchase_date' => $this->faker->dateTimeBetween('-5 years', 'now'),
+            'purchase_price' => $this->faker->randomFloat(2, 50000, 1000000),
+            'description' => $this->faker->paragraph,
+            'amenities' => $this->faker->randomElements(['Pool', 'Gym', 'Parking', 'Laundry', 'WiFi'], rand(1, 4)),
+            'images' => [],
         ];
-    }
-
-    public function inactive(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'is_active' => false,
-        ]);
-    }
-
-    public function expensive(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'price_per_night' => $this->faker->randomFloat(2, 400, 1000),
-        ]);
-    }
-
-    public function cheap(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'price_per_night' => $this->faker->randomFloat(2, 25, 100),
-        ]);
     }
 }

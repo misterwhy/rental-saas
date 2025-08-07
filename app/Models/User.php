@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -10,45 +11,57 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'name',
         'email',
         'password',
-        'phone',
         'user_type',
-        'is_active',
+        'phone', // Add this if you're using it
     ];
 
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'is_active' => 'boolean',
-    ];
-
-    public function properties()
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
     {
-        return $this->hasMany(Property::class, 'landlord_id');
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
     }
 
-    public function bookings()
-    {
-        return $this->hasMany(Booking::class, 'tenant_id');
-    }
-
-    public function reviews()
-    {
-        return $this->hasMany(Review::class);
-    }
-
+    /**
+     * Check if the user is a landlord.
+     *
+     * @return bool
+     */
     public function isLandlord()
     {
         return $this->user_type === 'landlord';
     }
 
+    /**
+     * Check if the user is a tenant.
+     *
+     * @return bool
+     */
     public function isTenant()
     {
         return $this->user_type === 'tenant';

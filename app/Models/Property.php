@@ -10,60 +10,50 @@ class Property extends Model
     use HasFactory;
 
     protected $fillable = [
-        'title',
-        'description',
+        'owner_id',
+        'name',
         'address',
         'city',
         'state',
         'zip_code',
         'country',
-        'price_per_night',
-        'bedrooms',
-        'bathrooms',
-        'max_guests',
         'property_type',
+        'number_of_units',
+        'purchase_date',
+        'purchase_price',
+        'description',
         'amenities',
-        'landlord_id',
-        'is_active',
+        'images'
     ];
 
     protected $casts = [
         'amenities' => 'array',
-        'is_active' => 'boolean',
-        'price_per_night' => 'decimal:2',
+        'images' => 'array',
+        'purchase_date' => 'date',
+        'purchase_price' => 'decimal:2'
     ];
 
-    public function landlord()
+    protected $dates = [
+        'purchase_date',
+        'created_at',
+        'updated_at'
+    ];
+
+    // Relationships
+public function owner()
+{
+    // Make sure 'owner_id' matches the foreign key column name in your properties table
+    return $this->belongsTo(User::class, 'owner_id');
+    // If the method is named 'owner', use that instead of 'landlord' in your Blade file.
+}
+
+    public function units()
     {
-        return $this->belongsTo(User::class, 'landlord_id');
+        return $this->hasMany(Unit::class);
     }
 
-    public function images()
+    public function maintenanceRequests()
     {
-        return $this->hasMany(PropertyImage::class);
-    }
-
-    public function bookings()
-    {
-        return $this->hasMany(Booking::class);
-    }
-
-    public function reviews()
-    {
-        return $this->hasMany(Review::class);
-    }
-
-    public function getAverageRatingAttribute()
-    {
-        return $this->reviews()->avg('rating') ?? 0;
-    }
-
-    public function getMainImageAttribute()
-    {
-        $mainImage = $this->images()->where('is_main', true)->first();
-        if (!$mainImage) {
-            $mainImage = $this->images()->first();
-        }
-        return $mainImage ? $mainImage->image_path : null;
+        return $this->hasMany(MaintenanceRequest::class);
     }
 }

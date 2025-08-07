@@ -29,9 +29,6 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
-            'phone' => fake()->phoneNumber(),
-            'user_type' => fake()->randomElement(['landlord', 'tenant']),
-            'is_active' => true,
         ];
     }
 
@@ -42,26 +39,6 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
-        ]);
-    }
-
-    /**
-     * Create a landlord user.
-     */
-    public function landlord(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'user_type' => 'landlord',
-        ]);
-    }
-
-    /**
-     * Create a tenant user.
-     */
-    public function tenant(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'user_type' => 'tenant',
         ]);
     }
 }

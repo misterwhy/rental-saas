@@ -3,243 +3,359 @@
 namespace App\Http\Controllers;
 
 use App\Models\Property;
-use App\Models\PropertyImage;
-use App\Http\Requests\StorePropertyRequest;
-use App\Http\Requests\UpdatePropertyRequest;
-use App\Exceptions\PropertyNotFoundException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+// Import the Log facade for debugging
+use Illuminate\Support\Facades\Log;
+// Import Exception classes for specific handling
+use Illuminate\Database\QueryException;
+use Exception;
+
+// Use your application's base Controller class
+use App\Http\Controllers\Controller;
 
 class PropertyController extends Controller
 {
-    public function index(Request $request)
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
     {
-        $query = Property::where('is_active', true)->with('landlord');
+        // Fetch properties, eager load the owner relationship
+        $properties = Property::with('owner')->paginate(10);
 
-        if ($request->filled('location')) {
-            $query->where('city', 'LIKE', '%' . $request->location . '%');
-        }
-
-        if ($request->filled('min_price')) {
-            $query->where('price_per_night', '>=', $request->min_price);
-        }
-
-        if ($request->filled('max_price')) {
-            $query->where('price_per_night', '<=', $request->max_price);
-        }
-
-        if ($request->filled('guests')) {
-            $query->where('max_guests', '>=', $request->guests);
-        }
-
-        $properties = $query->paginate(12);
-
+        // Return the HTML view for the web interface
         return view('properties.index', compact('properties'));
     }
 
-    public function show(Property $property)
-    {
-        if (!$property->is_active) {
-            abort(404);
-        }
-
-        $property->load(['images', 'reviews.user', 'landlord']);
-        
-        return view('properties.show', compact('property'));
-    }
-
+    /**
+     * Show the form for creating a new resource.
+     */
     public function create()
     {
-        // Check if user is logged in
-        if (!auth()->check()) {
-            // If not logged in, redirect to login page
-            return redirect()->route('login')->with('message', 'Please login to create a property.');
-        }
-
-        // Check if logged-in user is a landlord
-        if (!auth()->user()->isLandlord()) {
-            // If logged in but not a landlord, deny access (redirect home or show error)
-            return redirect()->route('home')->with('error', 'Only landlords can create properties.');
-        }
-
-        // If user is logged in AND is a landlord, show the create form
+        // Return the create view
         return view('properties.create');
     }
 
-    public function store(StorePropertyRequest $request)
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
     {
+        // --- Debugging: Log that the method was called ---
+        Log::debug('PropertyController@store method called', ['user_id' => Auth::id()]);
+
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:255', // Assuming 'title' from form
+            'address' => 'required|string',
+            'city' => 'required|string',
+            'state' => 'required|string',
+            'zip_code' => 'required|string',
+            'country' => 'required|string',
+            'property_type' => 'required|string',
+            'number_of_units' => 'required|integer|min:1', // Or bedrooms/bathrooms if that's the model
+            // 'purchase_date' => 'nullable|date', // Uncomment if used
+            // 'purchase_price' => 'nullable|numeric|min:0', // Uncomment if used
+            'description' => 'nullable|string',
+            'amenities' => 'nullable|array', // For checkboxes
+            'amenities.*' => 'string|in:wifi,kitchen,parking,pool,ac,washer,tv',
+            'images' => 'nullable|array', // For file uploads
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048', // Validate each image
+        ]);
+
+        if ($validator->fails()) {
+            // Differentiate response based on request type
+            if ($request->expectsJson()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        // --- Main Logic with Error Handling ---
         try {
-            DB::beginTransaction();
+            // --- Debugging: Log incoming data ---
+            Log::debug('Property Creation Request Data (After Validation):', [
+                'validated_data' => $validator->validated(),
+                'all_request_data' => $request->all(),
+                'user_id' => Auth::id()
+            ]);
 
-            $validated = $request->validated();
-            $validated['landlord_id'] = auth()->id();
+            // Prepare data for creation
+            // Use only specific, validated/expected fields from the request for security.
+            $validatedData = $validator->validated();
 
-            $property = Property::create($validated);
-
-            // Handle image uploads
-            if ($request->hasFile('images')) {
-                $this->handleImageUploads($request->file('images'), $property);
+            // Map form field name 'title' to database column 'name' if necessary
+            $propertyData = [];
+            foreach ($validatedData as $key => $value) {
+                if ($key === 'title') {
+                    $propertyData['name'] = $value;
+                } else {
+                    $propertyData[$key] = $value;
+                }
             }
 
-            DB::commit();
+            // Add the owner_id
+            $propertyData['owner_id'] = Auth::id();
 
-            return redirect()->route('properties.show', $property)
-                ->with('success', 'Property created successfully!');
+            // --- Debugging: Log data being passed to create ---
+            Log::debug('Property Data to be Created (Before Model Create):', $propertyData);
 
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Property creation failed: ' . $e->getMessage());
-            
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Failed to create property. Please try again.');
+            // Create the property using the prepared data
+            $property = Property::create($propertyData);
+
+            // --- Debugging: Log success ---
+            Log::info('Property created successfully in Controller', [
+                'property_id' => $property->id,
+                'property_name' => $property->name,
+                'owner_id' => $property->owner_id
+            ]);
+
+            // --- Handle Images (Basic Example) ---
+            // This part depends heavily on your specific image handling logic.
+            // You might store images in storage/app/public and save paths,
+            // or use a dedicated media library package.
+            // The logic below is a simplified placeholder.
+            /*
+            if ($request->hasFile('images')) {
+                $imagePaths = [];
+                foreach ($request->file('images') as $image) {
+                    if ($image && $image->isValid()) {
+                        // Store in storage/app/public/property_images
+                        // 'public' disk stores in storage/app/public, accessible via /storage/...
+                        $path = $image->store('property_images', 'public');
+                        if ($path) {
+                            $imagePaths[] = $path; // Store relative path
+                            // Or store full URL: $imagePaths[] = Storage::disk('public')->url($path);
+                        } else {
+                             Log::warning('Failed to store an image for property', ['property_id' => $property->id, 'image_name' => $image->getClientOriginalName()]);
+                        }
+                    } else {
+                        Log::warning('Invalid image file uploaded', ['property_id' => $property->id]);
+                    }
+                }
+                if (!empty($imagePaths)) {
+                    // Update the property's images column (JSON)
+                    // Ensure your Property model casts 'images' to 'array'
+                    $property->update(['images' => $imagePaths]);
+                    Log::debug('Property images updated', ['property_id' => $property->id, 'image_paths' => $imagePaths]);
+                }
+            }
+            */
+
+            // Return response based on request type
+            if ($request->expectsJson()) {
+                // Eager load owner for the JSON response if needed
+                // $property->load('owner');
+                return response()->json($property, 201); // 201 Created
+            }
+
+            // Redirect for web requests
+            return redirect()->route('properties.index')->with('success', 'Property created successfully!');
+
+        } catch (QueryException $e) {
+            // Specific handling for database query errors (e.g., constraint violations, data type issues)
+            Log::error('Database Error Creating Property:', [
+                'message' => $e->getMessage(),
+                'sql' => $e->getSql(),
+                'bindings' => $e->getBindings(),
+                'user_id' => Auth::id(),
+                'input_data' => $request->all() // Log input for context, be cautious with sensitive data
+            ]);
+            $errorMessage = 'A database error occurred while creating the property. Please check the data and try again.';
+
+        } catch (Exception $e) {
+            // General exception handling for any other unexpected errors
+            Log::error('General Error Creating Property:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => Auth::id(),
+                'input_data' => $request->all() // Log input for context
+            ]);
+            $errorMessage = 'An unexpected error occurred while creating the property. Please try again.';
+        }
+
+        // If we reach here, an exception was caught
+
+        // Return error response based on request type
+        if ($request->expectsJson()) {
+            return response()->json(['error' => $errorMessage], 500); // 500 Internal Server Error
+        }
+
+        // Redirect back for web requests with error message and input data
+        return redirect()->back()->withErrors(['error' => $errorMessage])->withInput();
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Property $property)
+    {
+        $property->load(['owner', 'units']); // Eager load relationships
+        // Differentiate response based on request type
+        if (request()->expectsJson()) {
+            return response()->json($property);
+        }
+        // Assuming you have a show view
+        return view('properties.show', compact('property'));
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Property $property)
+    {
+        // Ensure only the owner can edit (basic check)
+        // You might want more robust authorization (e.g., Policies)
+        if (Auth::id() !== $property->owner_id) {
+             if (request()->expectsJson()) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+            abort(403); // Or redirect with error
+        }
+
+        // Return the edit view
+        return view('properties.edit', compact('property'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Property $property)
+    {
+         // Ensure only the owner can update (basic check)
+        if (Auth::id() !== $property->owner_id) {
+             if ($request->expectsJson()) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+            return redirect()->back()->withErrors(['error' => 'Unauthorized']);
+        }
+
+        // Define validation rules for update (might be slightly different than store)
+        $validator = Validator::make($request->all(), [
+            'title' => 'sometimes|string|max:255', // Assuming 'title' from form
+            'address' => 'sometimes|string',
+            'city' => 'sometimes|string',
+            'state' => 'sometimes|string',
+            'zip_code' => 'sometimes|string',
+            'country' => 'sometimes|string',
+            'property_type' => 'sometimes|string',
+            'number_of_units' => 'sometimes|integer|min:1',
+            // 'purchase_date' => 'nullable|date',
+            // 'purchase_price' => 'nullable|numeric|min:0',
+            'description' => 'nullable|string',
+            'amenities' => 'nullable|array',
+            'amenities.*' => 'string|in:wifi,kitchen,parking,pool,ac,washer,tv',
+            'images' => 'nullable|array', // For adding new images, maybe needs different handling
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            if ($request->expectsJson()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        try {
+            // Prepare data for update, mapping 'title' to 'name'
+            $validatedData = $validator->validated();
+            $updateData = [];
+            foreach ($validatedData as $key => $value) {
+                if ($key === 'title') {
+                    $updateData['name'] = $value;
+                } else {
+                    $updateData[$key] = $value;
+                }
+            }
+
+            // Perform the update
+            $property->update($updateData);
+
+            Log::info('Property updated successfully', ['property_id' => $property->id]);
+
+            if ($request->expectsJson()) {
+                // Reload relationships if needed
+                // $property->load('owner', 'units');
+                return response()->json($property);
+            }
+            return redirect()->route('properties.show', $property)->with('success', 'Property updated successfully');
+
+        } catch (Exception $e) {
+            Log::error('Error updating property', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'property_id' => $property->id,
+                'user_id' => Auth::id()
+            ]);
+            $errorMessage = 'An error occurred while updating the property. Please try again.';
+
+             if ($request->expectsJson()) {
+                return response()->json(['error' => $errorMessage], 500);
+            }
+            return redirect()->back()->withErrors(['error' => $errorMessage])->withInput();
         }
     }
 
     /**
-     * Handle multiple image uploads for a property
+     * Remove the specified resource from storage.
      */
-    private function handleImageUploads(array $images, Property $property): void
-    {
-        foreach ($images as $index => $image) {
-            $path = $image->store('property-images', 'public');
-            
-            PropertyImage::create([
-                'property_id' => $property->id,
-                'image_path' => $path,
-                'is_main' => $index === 0, // First image is main by default
-            ]);
-        }
-    }
-
-    public function edit(Property $property)
-    {
-        // Manual authentication check
-        if (!auth()->check()) {
-            return redirect()->route('login');
-        }
-
-        if (auth()->id() !== $property->landlord_id) {
-            abort(403, 'You can only edit your own properties.');
-        }
-
-        $property->load('images'); // Load images for editing
-        return view('properties.edit', compact('property'));
-    }
-
-    public function update(Request $request, Property $property)
-    {
-        // Manual authentication check
-        if (!auth()->check()) {
-            return redirect()->route('login');
-        }
-
-        if (auth()->id() !== $property->landlord_id) {
-            abort(403, 'You can only edit your own properties.');
-        }
-
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'address' => 'required|string|max:255',
-            'city' => 'required|string|max:100',
-            'state' => 'required|string|max:100',
-            'zip_code' => 'required|string|max:20',
-            'country' => 'required|string|max:100',
-            'price_per_night' => 'required|numeric|min:0',
-            'bedrooms' => 'required|integer|min:0',
-            'bathrooms' => 'required|integer|min:0',
-            'max_guests' => 'required|integer|min:1',
-            'property_type' => 'required|string|max:50',
-            'amenities' => 'array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048', // Image validation
-        ]);
-
-        $validated['amenities'] = $request->amenities ?? [];
-        $property->update($validated);
-
-        // Handle new image uploads
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('property_images', 'public');
-                PropertyImage::create([
-                    'property_id' => $property->id,
-                    'image_path' => $path,
-                    'is_main' => false, // New images are not main by default
-                ]);
-            }
-        }
-
-        return redirect()->route('properties.show', $property)
-                        ->with('success', 'Property updated successfully!');
-    }
-
     public function destroy(Property $property)
     {
-        // Manual authentication check
-        if (!auth()->check()) {
-            return redirect()->route('login');
+         // Ensure only the owner can delete (basic check)
+        if (Auth::id() !== $property->owner_id) {
+             if (request()->expectsJson()) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+            return redirect()->back()->withErrors(['error' => 'Unauthorized']);
         }
 
-        if (auth()->id() !== $property->landlord_id) {
-            abort(403, 'You can only delete your own properties.');
+        try {
+            $property->delete();
+            Log::info('Property deleted successfully', ['property_id' => $property->id]);
+
+            if (request()->expectsJson()) {
+                return response()->json(['message' => 'Property deleted successfully']);
+            }
+            return redirect()->route('properties.index')->with('success', 'Property deleted successfully');
+
+        } catch (Exception $e) {
+            Log::error('Error deleting property', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'property_id' => $property->id,
+                'user_id' => Auth::id()
+            ]);
+            $errorMessage = 'An error occurred while deleting the property. Please try again.';
+
+            if (request()->expectsJson()) {
+                return response()->json(['error' => $errorMessage], 500);
+            }
+            return redirect()->back()->withErrors(['error' => $errorMessage]);
         }
-
-        // Delete associated images
-        foreach ($property->images as $image) {
-            Storage::disk('public')->delete($image->image_path);
-            $image->delete();
-        }
-
-        $property->delete();
-
-        return redirect()->route('dashboard')
-                        ->with('success', 'Property deleted successfully!');
     }
 
-    // Add method to delete individual images
-    public function deleteImage(PropertyImage $image)
+    // Placeholder methods for the image routes (implement as needed)
+    // These might need adjustment based on how you manage images (e.g., delete by image path/id)
+    public function deleteImage($imageIdentifier) // $imageIdentifier could be ID, path, etc.
     {
-        // Check if user owns the property
-        if (!auth()->check() || auth()->id() !== $image->property->landlord_id) {
-            abort(403, 'Unauthorized');
+        // Implement image deletion logic
+        // Find property associated with the image, check ownership, delete file, update DB
+        Log::warning('deleteImage method called but not implemented', ['image_id' => $imageIdentifier]);
+        if (request()->expectsJson()) {
+            return response()->json(['message' => 'Image deletion logic not implemented yet.'], 501); // 501 Not Implemented
         }
-
-        // Don't delete if it's the only image or main image with other images
-        if ($image->property->images()->count() <= 1) {
-            return redirect()->back()->with('error', 'Cannot delete the only image. Upload a new image first.');
-        }
-
-        if ($image->is_main) {
-            return redirect()->back()->with('error', 'Cannot delete main image. Set another image as main first.');
-        }
-
-        // Delete the image file
-        Storage::disk('public')->delete($image->image_path);
-
-        // Delete the database record
-        $image->delete();
-
-        return redirect()->back()->with('success', 'Image deleted successfully!');
+        return redirect()->back()->with('info', 'Image deletion logic not implemented yet.');
     }
 
-    // Add method to set main image
-    public function setMainImage(PropertyImage $image)
+    public function setMainImage($imageIdentifier)
     {
-        // Check if user owns the property
-        if (!auth()->check() || auth()->id() !== $image->property->landlord_id) {
-            abort(403, 'Unauthorized');
+        // Implement set main image logic
+        // Find property, check ownership, update 'main_image' field or reorder images array
+        Log::warning('setMainImage method called but not implemented', ['image_id' => $imageIdentifier]);
+        if (request()->expectsJson()) {
+            return response()->json(['message' => 'Set main image logic not implemented yet.'], 501);
         }
-
-        // Remove main flag from all images of this property
-        PropertyImage::where('property_id', $image->property_id)->update(['is_main' => false]);
-
-        // Set this image as main
-        $image->update(['is_main' => true]);
-
-        return redirect()->back()->with('success', 'Main image updated successfully!');
+        return redirect()->back()->with('info', 'Set main image logic not implemented yet.');
     }
 }

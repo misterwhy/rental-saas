@@ -29,16 +29,16 @@
         <!-- Register Form -->
         <form method="POST" action="{{ route('register') }}" class="space-y-6">
             @csrf
-            
+
             <!-- Name Field -->
             <div>
                 <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                <input id="name" 
-                       type="text" 
-                       name="name" 
-                       value="{{ old('name') }}" 
-                       required 
-                       autocomplete="name" 
+                <input id="name"
+                       type="text"
+                       name="name"
+                       value="{{ old('name') }}"
+                       required
+                       autocomplete="name"
                        autofocus
                        class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors @error('name') border-red-300 @enderror">
                 @error('name')
@@ -49,11 +49,11 @@
             <!-- Email Field -->
             <div>
                 <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                <input id="email" 
-                       type="email" 
-                       name="email" 
-                       value="{{ old('email') }}" 
-                       required 
+                <input id="email"
+                       type="email"
+                       name="email"
+                       value="{{ old('email') }}"
+                       required
                        autocomplete="email"
                        class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors @error('email') border-red-300 @enderror">
                 @error('email')
@@ -64,10 +64,10 @@
             <!-- Phone Field -->
             <div>
                 <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                <input id="phone" 
-                       type="text" 
-                       name="phone" 
-                       value="{{ old('phone') }}" 
+                <input id="phone"
+                       type="text"
+                       name="phone"
+                       value="{{ old('phone') }}"
                        autocomplete="phone"
                        class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors @error('phone') border-red-300 @enderror">
                 @error('phone')
@@ -78,8 +78,8 @@
             <!-- User Type Field -->
             <div>
                 <label for="user_type" class="block text-sm font-medium text-gray-700 mb-2">Account Type</label>
-                <select id="user_type" 
-                        name="user_type" 
+                <select id="user_type"
+                        name="user_type"
                         required
                         class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors @error('user_type') border-red-300 @enderror">
                     <option value="">Select account type</option>
@@ -94,10 +94,10 @@
             <!-- Password Field -->
             <div>
                 <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                <input id="password" 
-                       type="password" 
-                       name="password" 
-                       required 
+                <input id="password"
+                       type="password"
+                       name="password"
+                       required
                        autocomplete="new-password"
                        class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors @error('password') border-red-300 @enderror">
                 @error('password')
@@ -108,16 +108,16 @@
             <!-- Confirm Password Field -->
             <div>
                 <label for="password-confirm" class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
-                <input id="password-confirm" 
-                       type="password" 
-                       name="password_confirmation" 
-                       required 
+                <input id="password-confirm"
+                       type="password"
+                       name="password_confirmation"
+                       required
                        autocomplete="new-password"
                        class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors">
             </div>
 
             <!-- Register Button -->
-            <button type="submit" 
+            <button type="submit"
                     class="w-full bg-emerald-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors">
                 Create Account
             </button>
@@ -126,7 +126,7 @@
         <!-- Login Link -->
         <div class="mt-6 text-center">
             <p class="text-sm text-gray-600">
-                Already have an account? 
+                Already have an account?
                 <a href="{{ route('login') }}" class="text-emerald-600 hover:text-emerald-500 font-medium">
                     Sign in
                 </a>
@@ -135,40 +135,3 @@
     </div>
 </body>
 </html>
-                                style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 5px; background-color: var(--info-bg); color: var(--text-color); font-size: 0.9rem;">
-                            <option value="tenant" {{ old('user_type') == 'tenant' ? 'selected' : '' }}>Tenant</option>
-                            <option value="landlord" {{ old('user_type') == 'landlord' ? 'selected' : '' }}>Landlord</option>
-                        </select>
-                        @error('user_type')
-                            <span class="invalid-feedback" role="alert" style="font-size: 0.75rem; color: #ef4444; margin-top: 0.25rem;">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3" style="padding: 0 12px;">
-                        <label for="password" class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color); display: block; margin-bottom: 0.3rem;">Password</label>
-                        <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="new-password"
-                               style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 5px; background-color: var(--info-bg); color: var(--text-color); font-size: 0.9rem;">
-                        @error('password')
-                            <span class="invalid-feedback" role="alert" style="font-size: 0.75rem; color: #ef4444; margin-top: 0.25rem;">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3" style="padding: 0 12px;">
-                        <label for="password-confirm" class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color); display: block; margin-bottom: 0.3rem;">Confirm Password</label>
-                        <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required autocomplete="new-password"
-                               style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 5px; background-color: var(--info-bg); color: var(--text-color); font-size: 0.9rem;">
-                    </div>
-
-                    <div class="mb-3" style="padding: 15px 12px 12px 12px; text-align: center;">
-                        <button type="submit" class="save-btn">Register</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-@endsection
