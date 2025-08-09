@@ -21,7 +21,12 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // Public Routes
 Route::get('/properties/create', [PropertyController::class, 'create'])->name('properties.create');
 Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
+ Route::get('/analytics', [App\Http\Controllers\AnalyticsController::class, 'index'])->name('analytics.index');
+
+
 Route::get('/properties/{property}', [PropertyController::class, 'show'])->name('properties.show');
+
+
 
 // Property Image Management Routes (outside auth group for GET requests)
 // Note: These might need adjustment depending on who can delete/set main images.
@@ -29,9 +34,12 @@ Route::delete('/properties/images/{image}', [PropertyController::class, 'deleteI
 Route::post('/properties/images/{image}/set-main', [PropertyController::class, 'setMainImage'])->name('properties.images.set-main');
 
 // Protected Routes
-Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::middleware(['auth'])->group(function () 
+{
+    Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard')->middleware(['auth']);    
     
+    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+
     // Property CRUD Routes (POST, PUT, DELETE still protected)
     Route::post('/properties', [PropertyController::class, 'store'])->name('properties.store');
     Route::get('/properties/{property}/edit', [PropertyController::class, 'edit'])->name('properties.edit');

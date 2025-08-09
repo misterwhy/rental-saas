@@ -2,6 +2,25 @@
 
 @section('content')
 <div class="mb-8">
+    <!-- Action Buttons -->
+    <div class="mt-4 flex space-x-2">
+        <!-- Edit Button -->
+        <a href="{{ route('properties.edit', $property->id) }}" 
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Edit Property
+        </a>
+
+        <!-- Delete Button -->
+        <form action="{{ route('properties.destroy', $property->id) }}" 
+            method="POST" 
+            onsubmit="return confirm('Are you sure you want to delete this property?');">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                Delete Property
+            </button>
+        </form>
+    </div>
     <div class="flex justify-between items-center">
         <div>
             <h1 class="text-xl font-semibold text-gray-900">{{ $property->title }}</h1>
@@ -52,15 +71,16 @@
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
     <!-- Property Image -->
     <div class="dashboard-card">
         <div class="aspect-video bg-gray-100 rounded-lg overflow-hidden">
         @if($property->main_image)
-            <img src="{{ asset('storage/' . $property->main_image) }}" 
+                <img src="{{ asset('storage/' . $property->mainImage->image_path) }}" 
                 alt="{{ $property->title }}"
                 class="w-full h-full object-cover">
         @else
-            <img src="{{ asset('storage/images/default-property.jpg') }}" 
+                <img src="{{ asset('images/default-property.jpg') }}" 
                 alt="Default Property"
                 class="w-full h-full object-cover">
         @endif

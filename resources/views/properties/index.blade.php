@@ -36,24 +36,19 @@
 @if($properties->count() > 0)
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         @foreach($properties as $property)
+        
             <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200">
                 <!-- Property Image -->
                 <div class="relative h-48 overflow-hidden">
-                    @if($property->main_image)
-                        <img src="{{ asset('storage/' . $property->main_image) }}" 
-                            alt="{{ $property->title }}"
+                    @if($property->mainImage)
+                        <img src="{{ asset('storage/' . $property->mainImage->image_path) }}" 
+                            alt="{{ $property->name }}"
                             class="w-full h-full object-cover">
                     @else
-                        <img src="{{ asset('storage/images/default-property.jpg') }}" 
+                        <img src="{{ asset('images/default-property.jpg') }}" 
                             alt="Default Property"
                             class="w-full h-full object-cover">
                     @endif
-
-                    <div class="absolute top-2 right-2">
-                        <span class="px-2 py-1 text-xs font-semibold bg-white bg-opacity-80 text-gray-800 rounded-full">
-                            {{ $property->property_type }}
-                        </span>
-                    </div>
                 </div>
 
 

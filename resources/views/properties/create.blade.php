@@ -104,10 +104,12 @@
                     <label for="property_type" class="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
                     <select id="property_type" name="property_type" required
                             class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors @error('property_type') border-red-300 @enderror">
-                        <option value="">Select Property Type</option>
-                        <option value="Residential" {{ old('property_type') == 'Residential' ? 'selected' : '' }}>Residential</option>
-                        <option value="Commercial" {{ old('property_type') == 'Commercial' ? 'selected' : '' }}>Commercial</option>
-                        <option value="HOA" {{ old('property_type') == 'HOA' ? 'selected' : '' }}>HOA</option>
+                        <option value="">Select property type</option>
+                        <option value="Apartment" {{ old('property_type') == 'Apartment' ? 'selected' : '' }}>Apartment</option>
+                        <option value="House" {{ old('property_type') == 'House' ? 'selected' : '' }}>House</option>
+                        <option value="Condo" {{ old('property_type') == 'Condo' ? 'selected' : '' }}>Condo</option>
+                        <option value="Townhouse" {{ old('property_type') == 'Townhouse' ? 'selected' : '' }}>Townhouse</option>
+                        <option value="Cabin" {{ old('property_type') == 'Cabin' ? 'selected' : '' }}>Cabin</option>
                     </select>
                     @error('property_type')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>

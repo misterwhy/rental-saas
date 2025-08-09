@@ -1,278 +1,259 @@
 @extends('layouts.app')
-
 @section('content')
-<div class="content-wrap">
-    <div class="content-head">
-        <h1>Edit Property: {{ $property->title }}</h1>
-        <div class="action">
-            <a href="{{ route('properties.show', $property) }}" class="edit-btn">Cancel</a>
+<div class="mb-8">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-semibold text-gray-900">Edit Property</h1>
+            <p class="text-gray-500 text-sm mt-1">Update your property listing</p>
         </div>
-    </div>
-
-    <div class="room-grid">
-        <div class="card111">
-            <div class="details111">
-                <form method="POST" action="{{ route('properties.update', $property) }}" enctype="multipart/form-data">
-                    @csrf
-                    @method('PUT')
-
-                    <!-- Title and Type Row -->
-                    <div class="row mb-3" style="padding: 0 12px;">
-                        <div class="col-md-6">
-                            <label for="title" class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color); display: block; margin-bottom: 0.3rem;">Property Title</label>
-                            <input type="text" class="form-control @error('title') is-invalid @enderror"
-                                   id="title" name="title" value="{{ old('title', $property->title) }}" required
-                                   style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 5px; background-color: var(--info-bg); color: var(--text-color); font-size: 0.9rem;">
-                            @error('title')
-                                <div class="invalid-feedback" style="font-size: 0.75rem; color: #ef4444; margin-top: 0.25rem;">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label for="property_type" class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color); display: block; margin-bottom: 0.3rem;">Property Type</label>
-                            <select class="form-control @error('property_type') is-invalid @enderror"
-                                    id="property_type" name="property_type" required
-                                    style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 5px; background-color: var(--info-bg); color: var(--text-color); font-size: 0.9rem;">
-                                <option value="">Select Type</option>
-                                <option value="Apartment" {{ old('property_type', $property->property_type) == 'Apartment' ? 'selected' : '' }}>Apartment</option>
-                                <option value="House" {{ old('property_type', $property->property_type) == 'House' ? 'selected' : '' }}>House</option>
-                                <option value="Condo" {{ old('property_type', $property->property_type) == 'Condo' ? 'selected' : '' }}>Condo</option>
-                                <option value="Townhouse" {{ old('property_type', $property->property_type) == 'Townhouse' ? 'selected' : '' }}>Townhouse</option>
-                                <option value="Cabin" {{ old('property_type', $property->property_type) == 'Cabin' ? 'selected' : '' }}>Cabin</option>
-                            </select>
-                            @error('property_type')
-                                <div class="invalid-feedback" style="font-size: 0.75rem; color: #ef4444; margin-top: 0.25rem;">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <!-- Description -->
-                    <div class="mb-3" style="padding: 0 12px;">
-                        <label for="description" class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color); display: block; margin-bottom: 0.3rem;">Description</label>
-                        <textarea class="form-control @error('description') is-invalid @enderror"
-                                  id="description" name="description" rows="3" required
-                                  style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 5px; background-color: var(--info-bg); color: var(--text-color); font-size: 0.9rem; resize: vertical;">{{ old('description', $property->description) }}</textarea>
-                        @error('description')
-                            <div class="invalid-feedback" style="font-size: 0.75rem; color: #ef4444; margin-top: 0.25rem;">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <!-- Address Row -->
-                    <div class="row mb-3" style="padding: 0 12px;">
-                        <div class="col-md-6">
-                            <label for="address" class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color); display: block; margin-bottom: 0.3rem;">Address</label>
-                            <input type="text" class="form-control @error('address') is-invalid @enderror"
-                                   id="address" name="address" value="{{ old('address', $property->address) }}" required
-                                   style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 5px; background-color: var(--info-bg); color: var(--text-color); font-size: 0.9rem;">
-                            @error('address')
-                                <div class="invalid-feedback" style="font-size: 0.75rem; color: #ef4444; margin-top: 0.25rem;">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label for="city" class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color); display: block; margin-bottom: 0.3rem;">City</label>
-                            <input type="text" class="form-control @error('city') is-invalid @enderror"
-                                   id="city" name="city" value="{{ old('city', $property->city) }}" required
-                                   style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 5px; background-color: var(--info-bg); color: var(--text-color); font-size: 0.9rem;">
-                            @error('city')
-                                <div class="invalid-feedback" style="font-size: 0.75rem; color: #ef4444; margin-top: 0.25rem;">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <!-- State, Zip, Country Row -->
-                    <div class="row mb-3" style="padding: 0 12px;">
-                        <div class="col-md-4">
-                            <label for="state" class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color); display: block; margin-bottom: 0.3rem;">State</label>
-                            <input type="text" class="form-control @error('state') is-invalid @enderror"
-                                   id="state" name="state" value="{{ old('state', $property->state) }}" required
-                                   style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 5px; background-color: var(--info-bg); color: var(--text-color); font-size: 0.9rem;">
-                            @error('state')
-                                <div class="invalid-feedback" style="font-size: 0.75rem; color: #ef4444; margin-top: 0.25rem;">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-md-4">
-                            <label for="zip_code" class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color); display: block; margin-bottom: 0.3rem;">Zip Code</label>
-                            <input type="text" class="form-control @error('zip_code') is-invalid @enderror"
-                                   id="zip_code" name="zip_code" value="{{ old('zip_code', $property->zip_code) }}" required
-                                   style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 5px; background-color: var(--info-bg); color: var(--text-color); font-size: 0.9rem;">
-                            @error('zip_code')
-                                <div class="invalid-feedback" style="font-size: 0.75rem; color: #ef4444; margin-top: 0.25rem;">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-md-4">
-                            <label for="country" class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color); display: block; margin-bottom: 0.3rem;">Country</label>
-                            <input type="text" class="form-control @error('country') is-invalid @enderror"
-                                   id="country" name="country" value="{{ old('country', $property->country) }}" required
-                                   style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 5px; background-color: var(--info-bg); color: var(--text-color); font-size: 0.9rem;">
-                            @error('country')
-                                <div class="invalid-feedback" style="font-size: 0.75rem; color: #ef4444; margin-top: 0.25rem;">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <!-- Price, Bedrooms, Bathrooms, Guests Row -->
-                    <div class="row mb-3" style="padding: 0 12px;">
-                        <div class="col-md-3">
-                            <label for="price_per_night" class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color); display: block; margin-bottom: 0.3rem;">Price/Night ($)</label>
-                            <input type="number" class="form-control @error('price_per_night') is-invalid @enderror"
-                                   id="price_per_night" name="price_per_night" value="{{ old('price_per_night', $property->price_per_night) }}"
-                                   step="0.01" min="0" required
-                                   style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 5px; background-color: var(--info-bg); color: var(--text-color); font-size: 0.9rem;">
-                            @error('price_per_night')
-                                <div class="invalid-feedback" style="font-size: 0.75rem; color: #ef4444; margin-top: 0.25rem;">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-md-3">
-                            <label for="bedrooms" class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color); display: block; margin-bottom: 0.3rem;">Bedrooms</label>
-                            <input type="number" class="form-control @error('bedrooms') is-invalid @enderror"
-                                   id="bedrooms" name="bedrooms" value="{{ old('bedrooms', $property->bedrooms) }}"
-                                   min="0" required
-                                   style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 5px; background-color: var(--info-bg); color: var(--text-color); font-size: 0.9rem;">
-                            @error('bedrooms')
-                                <div class="invalid-feedback" style="font-size: 0.75rem; color: #ef4444; margin-top: 0.25rem;">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-md-3">
-                            <label for="bathrooms" class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color); display: block; margin-bottom: 0.3rem;">Bathrooms</label>
-                            <input type="number" class="form-control @error('bathrooms') is-invalid @enderror"
-                                   id="bathrooms" name="bathrooms" value="{{ old('bathrooms', $property->bathrooms) }}"
-                                   min="0" step="0.5" required
-                                   style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 5px; background-color: var(--info-bg); color: var(--text-color); font-size: 0.9rem;">
-                            @error('bathrooms')
-                                <div class="invalid-feedback" style="font-size: 0.75rem; color: #ef4444; margin-top: 0.25rem;">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-md-3">
-                            <label for="max_guests" class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color); display: block; margin-bottom: 0.3rem;">Max Guests</label>
-                            <input type="number" class="form-control @error('max_guests') is-invalid @enderror"
-                                   id="max_guests" name="max_guests" value="{{ old('max_guests', $property->max_guests) }}"
-                                   min="1" required
-                                   style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 5px; background-color: var(--info-bg); color: var(--text-color); font-size: 0.9rem;">
-                            @error('max_guests')
-                                <div class="invalid-feedback" style="font-size: 0.75rem; color: #ef4444; margin-top: 0.25rem;">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <!-- Amenities -->
-                    <div class="mb-3" style="padding: 0 12px;">
-                        <label class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color); display: block; margin-bottom: 0.3rem;">Amenities</label>
-                        @php
-                            $propertyAmenities = is_array($property->amenities) ? $property->amenities : (is_string($property->amenities) ? json_decode($property->amenities, true) : []);
-                            if (!is_array($propertyAmenities)) $propertyAmenities = [];
-                        @endphp
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="form-check" style="margin-bottom: 0.5rem;">
-                                    <input class="form-check-input" type="checkbox" name="amenities[]" value="wifi" id="wifi"
-                                           {{ (is_array(old('amenities')) && in_array('wifi', old('amenities'))) || in_array('wifi', $propertyAmenities) ? 'checked' : '' }}
-                                           style="margin-right: 0.5rem;">
-                                    <label class="form-check-label" for="wifi" style="font-size: 0.85rem;">WiFi</label>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-check" style="margin-bottom: 0.5rem;">
-                                    <input class="form-check-input" type="checkbox" name="amenities[]" value="kitchen" id="kitchen"
-                                           {{ (is_array(old('amenities')) && in_array('kitchen', old('amenities'))) || in_array('kitchen', $propertyAmenities) ? 'checked' : '' }}
-                                           style="margin-right: 0.5rem;">
-                                    <label class="form-check-label" for="kitchen" style="font-size: 0.85rem;">Kitchen</label>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-check" style="margin-bottom: 0.5rem;">
-                                    <input class="form-check-input" type="checkbox" name="amenities[]" value="parking" id="parking"
-                                           {{ (is_array(old('amenities')) && in_array('parking', old('amenities'))) || in_array('parking', $propertyAmenities) ? 'checked' : '' }}
-                                           style="margin-right: 0.5rem;">
-                                    <label class="form-check-label" for="parking" style="font-size: 0.85rem;">Parking</label>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-check" style="margin-bottom: 0.5rem;">
-                                    <input class="form-check-input" type="checkbox" name="amenities[]" value="pool" id="pool"
-                                           {{ (is_array(old('amenities')) && in_array('pool', old('amenities'))) || in_array('pool', $propertyAmenities) ? 'checked' : '' }}
-                                           style="margin-right: 0.5rem;">
-                                    <label class="form-check-label" for="pool" style="font-size: 0.85rem;">Pool</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mt-2">
-                            <div class="col-md-3">
-                                <div class="form-check" style="margin-bottom: 0.5rem;">
-                                    <input class="form-check-input" type="checkbox" name="amenities[]" value="air_conditioning" id="air_conditioning"
-                                           {{ (is_array(old('amenities')) && in_array('air_conditioning', old('amenities'))) || in_array('air_conditioning', $propertyAmenities) ? 'checked' : '' }}
-                                           style="margin-right: 0.5rem;">
-                                    <label class="form-check-label" for="air_conditioning" style="font-size: 0.85rem;">AC</label>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-check" style="margin-bottom: 0.5rem;">
-                                    <input class="form-check-input" type="checkbox" name="amenities[]" value="washer" id="washer"
-                                           {{ (is_array(old('amenities')) && in_array('washer', old('amenities'))) || in_array('washer', $propertyAmenities) ? 'checked' : '' }}
-                                           style="margin-right: 0.5rem;">
-                                    <label class="form-check-label" for="washer" style="font-size: 0.85rem;">Washer</label>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-check" style="margin-bottom: 0.5rem;">
-                                    <input class="form-check-input" type="checkbox" name="amenities[]" value="tv" id="tv"
-                                           {{ (is_array(old('amenities')) && in_array('tv', old('amenities'))) || in_array('tv', $propertyAmenities) ? 'checked' : '' }}
-                                           style="margin-right: 0.5rem;">
-                                    <label class="form-check-label" for="tv" style="font-size: 0.85rem;">TV</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Image Management Section -->
-                    <div class="mb-3" style="padding: 0 12px;">
-                        <label class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color); display: block; margin-bottom: 0.3rem;">Current Images</label>
-                        @if($property->images && $property->images->count() > 0)
-                            <div class="row" style="margin-top: 10px;">
-                                @foreach($property->images as $image)
-                                    <div class="col-md-3 mb-3">
-                                        <div class="card" style="border-radius: 10px; overflow: hidden; height: 180px; position: relative;">
-                                            <img src="{{ asset('storage/' . $image->image_path) }}"
-                                                 class="card-img-top" alt="Property image" style="width: 100%; height: 100%; object-fit: cover;">
-                                            <div class="card-body p-2 text-center" style="position: absolute; bottom: 0; width: 100%; background: rgba(255, 255, 255, 0.8); display: flex; justify-content: center; gap: 5px; padding: 5px;">
-                                                @if($image->is_main)
-                                                    <span class="badge bg-primary" style="font-size: 0.6rem;">Main</span>
-                                                @else
-                                                    <form method="POST" action="{{ route('properties.images.set-main', $image) }}" class="d-inline">
-                                                        @csrf
-                                                        @method('POST')
-                                                        <button type="submit" class="btn btn-sm btn-outline-primary" style="padding: 2px 5px; font-size: 0.6rem; border-radius: 3px;">Set Main</button>
-                                                    </form>
-                                                @endif
-                                                <form method="POST" action="{{ route('properties.images.delete', $image) }}" class="d-inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                            onclick="return confirm('Are you sure you want to delete this image?')"
-                                                            style="padding: 2px 5px; font-size: 0.6rem; border-radius: 3px;">Delete</button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <p class="text-muted" style="font-size: 0.8rem;">No images uploaded yet.</p>
-                        @endif
-                    </div>
-
-                    <div class="mb-3" style="padding: 0 12px;">
-                        <label for="new_images" class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color); display: block; margin-bottom: 0.3rem;">Add New Images</label>
-                        <input type="file" class="form-control" id="new_images" name="images[]" multiple accept="image/*"
-                               style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 5px; background-color: var(--info-bg); color: var(--text-color); font-size: 0.9rem;">
-                        <div class="form-text" style="font-size: 0.75rem; color: var(--text-color-secondary); margin-top: 0.25rem;">Select images to add to your property.</div>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <div class="mb-3" style="padding: 15px 12px 12px 12px; text-align: center;">
-                        <button type="submit" class="save-btn">Update Property</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        <a href="{{ route('properties.show', $property) }}"
+           class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-lg font-medium transition-colors duration-200">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Back to Property
+        </a>
     </div>
 </div>
+
+<div class="dashboard-card max-w-4xl">
+    <form method="POST" action="{{ route('properties.update', $property) }}" enctype="multipart/form-data" class="space-y-6">
+        @csrf
+        @method('PUT')
+        
+        <!-- Existing Images Display -->
+        @if($property->images && $property->images->count() > 0)
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Current Images</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-4">
+                @foreach($property->images as $image)
+                <div class="relative group">
+                    <img src="{{ asset('storage/' . $image->image_path) }}" 
+                         alt="Property image" 
+                         class="w-full h-32 object-cover rounded-lg">
+                    <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg">
+                        <button type="button" 
+                                onclick="removeImage({{ $image->id }})"
+                                class="text-white bg-red-500 hover:bg-red-600 rounded-full p-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <!-- Hidden input to track images to remove -->
+                    <input type="hidden" name="existing_images[]" value="{{ $image->id }}" id="image_{{ $image->id }}">
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        <!-- Basic Information -->
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Basic Information</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2">
+                    <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Property Title</label>
+                    <input type="text" id="title" name="title" value="{{ old('title', $property->name) }}" required
+                           class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors @error('title') border-red-300 @enderror">
+                    @error('title')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div class="md:col-span-2">
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <textarea id="description" name="description" rows="4"
+                              class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors @error('description') border-red-300 @enderror">{{ old('description', $property->description) }}</textarea>
+                    @error('description')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+        </div>
+
+        <!-- Location Details -->
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Location Details</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="address" class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                    <input type="text" id="address" name="address" value="{{ old('address', $property->address) }}" required
+                           class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors @error('address') border-red-300 @enderror">
+                    @error('address')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div>
+                    <label for="city" class="block text-sm font-medium text-gray-700 mb-2">City</label>
+                    <input type="text" id="city" name="city" value="{{ old('city', $property->city) }}" required
+                           class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors @error('city') border-red-300 @enderror">
+                    @error('city')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div>
+                    <label for="state" class="block text-sm font-medium text-gray-700 mb-2">State</label>
+                    <input type="text" id="state" name="state" value="{{ old('state', $property->state) }}" required
+                           class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors @error('state') border-red-300 @enderror">
+                    @error('state')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div>
+                    <label for="zip_code" class="block text-sm font-medium text-gray-700 mb-2">ZIP Code</label>
+                    <input type="text" id="zip_code" name="zip_code" value="{{ old('zip_code', $property->zip_code) }}" required
+                           class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors @error('zip_code') border-red-300 @enderror">
+                    @error('zip_code')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div class="md:col-span-2">
+                    <label for="country" class="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                    <input type="text" id="country" name="country" value="{{ old('country', $property->country) }}" required
+                           class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors @error('country') border-red-300 @enderror">
+                    @error('country')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+        </div>
+
+        <!-- Property Details -->
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Property Details</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="property_type" class="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
+                    <select id="property_type" name="property_type" required
+                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors @error('property_type') border-red-300 @enderror">
+                        <option value="">Select property type</option>
+                        <option value="Apartment" {{ old('property_type', $property->property_type) == 'Apartment' ? 'selected' : '' }}>Apartment</option>
+                        <option value="House" {{ old('property_type', $property->property_type) == 'House' ? 'selected' : '' }}>House</option>
+                        <option value="Condo" {{ old('property_type', $property->property_type) == 'Condo' ? 'selected' : '' }}>Condo</option>
+                        <option value="Townhouse" {{ old('property_type', $property->property_type) == 'Townhouse' ? 'selected' : '' }}>Townhouse</option>
+                        <option value="Cabin" {{ old('property_type', $property->property_type) == 'Cabin' ? 'selected' : '' }}>Cabin</option>
+                    </select>
+                    @error('property_type')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div>
+                    <label for="number_of_units" class="block text-sm font-medium text-gray-700 mb-2">Number of Units</label>
+                    <input type="number" id="number_of_units" name="number_of_units" value="{{ old('number_of_units', $property->number_of_units) }}" min="1" required
+                           class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors @error('number_of_units') border-red-300 @enderror">
+                    @error('number_of_units')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div>
+                    <label for="purchase_date" class="block text-sm font-medium text-gray-700 mb-2">Purchase Date</label>
+                    <input type="date" id="purchase_date" name="purchase_date" value="{{ old('purchase_date', $property->purchase_date ? $property->purchase_date->format('Y-m-d') : '') }}"
+                           class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors @error('purchase_date') border-red-300 @enderror">
+                    @error('purchase_date')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div>
+                    <label for="purchase_price" class="block text-sm font-medium text-gray-700 mb-2">Purchase Price ($)</label>
+                    <input type="number" id="purchase_price" name="purchase_price" value="{{ old('purchase_price', $property->purchase_price) }}" step="0.01" min="0"
+                           class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors @error('purchase_price') border-red-300 @enderror">
+                    @error('purchase_price')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+        </div>
+
+        <!-- Amenities -->
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Amenities</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <label class="flex items-center space-x-3 cursor-pointer">
+                    <input type="checkbox" name="amenities[]" value="wifi" {{ in_array('wifi', old('amenities', $property->amenities ?? [])) ? 'checked' : '' }}
+                           class="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500">
+                    <span class="text-sm text-gray-700">WiFi</span>
+                </label>
+                <label class="flex items-center space-x-3 cursor-pointer">
+                    <input type="checkbox" name="amenities[]" value="kitchen" {{ in_array('kitchen', old('amenities', $property->amenities ?? [])) ? 'checked' : '' }}
+                           class="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500">
+                    <span class="text-sm text-gray-700">Kitchen</span>
+                </label>
+                <label class="flex items-center space-x-3 cursor-pointer">
+                    <input type="checkbox" name="amenities[]" value="parking" {{ in_array('parking', old('amenities', $property->amenities ?? [])) ? 'checked' : '' }}
+                           class="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500">
+                    <span class="text-sm text-gray-700">Parking</span>
+                </label>
+                <label class="flex items-center space-x-3 cursor-pointer">
+                    <input type="checkbox" name="amenities[]" value="pool" {{ in_array('pool', old('amenities', $property->amenities ?? [])) ? 'checked' : '' }}
+                           class="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500">
+                    <span class="text-sm text-gray-700">Pool</span>
+                </label>
+                <label class="flex items-center space-x-3 cursor-pointer">
+                    <input type="checkbox" name="amenities[]" value="air_conditioning" {{ in_array('air_conditioning', old('amenities', $property->amenities ?? [])) ? 'checked' : '' }}
+                           class="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500">
+                    <span class="text-sm text-gray-700">AC</span>
+                </label>
+                <label class="flex items-center space-x-3 cursor-pointer">
+                    <input type="checkbox" name="amenities[]" value="washer" {{ in_array('washer', old('amenities', $property->amenities ?? [])) ? 'checked' : '' }}
+                           class="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500">
+                    <span class="text-sm text-gray-700">Washer</span>
+                </label>
+                <label class="flex items-center space-x-3 cursor-pointer">
+                    <input type="checkbox" name="amenities[]" value="tv" {{ in_array('tv', old('amenities', $property->amenities ?? [])) ? 'checked' : '' }}
+                           class="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500">
+                    <span class="text-sm text-gray-700">TV</span>
+                </label>
+            </div>
+            @error('amenities')
+                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+            @error('amenities.*')
+                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <!-- Images - Add New Images -->
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Add New Images</h2>
+            <div class="mb-4">
+                <label for="new_images" class="block text-sm font-medium text-gray-700 mb-2">Upload New Images</label>
+                <input type="file" id="new_images" name="new_images[]" multiple accept="image/*"
+                       class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors @error('new_images') border-red-300 @enderror @error('new_images.*') border-red-300 @enderror">
+                @error('new_images')
+                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+                @error('new_images.*')
+                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+                <p class="mt-2 text-sm text-gray-500">You can select multiple images. Supported formats: JPG, JPEG, PNG, GIF, WebP. Max size: 2MB each.</p>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+            <a href="{{ route('properties.show', $property) }}"
+               class="px-6 py-3 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-lg font-medium transition-colors duration-200">
+                Cancel
+            </a>
+            <button type="submit"
+                    class="px-6 py-3 bg-emerald-600 text-white hover:bg-emerald-700 rounded-lg font-medium transition-colors duration-200">
+                Update Property
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+function removeImage(imageId) {
+    if (confirm('Are you sure you want to remove this image?')) {
+        // Hide the image container
+        const imageElement = document.querySelector(`[id='image_${imageId}']`).closest('.relative');
+        imageElement.style.display = 'none';
+        
+        // Mark the image for removal by changing the input name
+        const input = document.querySelector(`[id='image_${imageId}']`);
+        input.name = 'remove_images[]';
+    }
+}
+</script>
 @endsection

@@ -48,11 +48,11 @@
                             required
                             class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors @error('property_type') border-red-300 @enderror">
                         <option value="">Select property type</option>
-                        <option value="apartment" {{ old('property_type') == 'apartment' ? 'selected' : '' }}>Apartment</option>
-                        <option value="house" {{ old('property_type') == 'house' ? 'selected' : '' }}>House</option>
-                        <option value="condo" {{ old('property_type') == 'condo' ? 'selected' : '' }}>Condo</option>
-                        <option value="studio" {{ old('property_type') == 'studio' ? 'selected' : '' }}>Studio</option>
-                        <option value="townhouse" {{ old('property_type') == 'townhouse' ? 'selected' : '' }}>Townhouse</option>
+                        <option value="Apartment" {{ old('property_type') == 'Apartment' ? 'selected' : '' }}>Apartment</option>
+                        <option value="House" {{ old('property_type') == 'House' ? 'selected' : '' }}>House</option>
+                        <option value="Condo" {{ old('property_type') == 'Condo' ? 'selected' : '' }}>Condo</option>
+                        <option value="Townhouse" {{ old('property_type') == 'Townhouse' ? 'selected' : '' }}>Townhouse</option>
+                        <option value="Cabin" {{ old('property_type') == 'Cabin' ? 'selected' : '' }}>Cabin</option>
                     </select>
                     @error('property_type')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
