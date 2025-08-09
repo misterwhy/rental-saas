@@ -17,7 +17,9 @@ class PropertyController extends Controller
      */
     public function index(Request $request)
     {
-        $properties = Property::with('images', 'owner')->paginate(12);
+        $properties = Property::with('images', 'owner')
+            ->where('owner_id', Auth::id()) // Only show user's own properties
+            ->paginate(12);
         return view('properties.index', compact('properties'));
     }
 
@@ -43,7 +45,6 @@ class PropertyController extends Controller
             'zip_code' => 'required|string',
             'country' => 'required|string',
             'property_type' => 'required|in:Apartment,House,Condo,Townhouse,Cabin',
-            // Remove rental-specific fields and add property management fields
             'number_of_units' => 'required|integer|min:1',
             'purchase_date' => 'nullable|date',
             'purchase_price' => 'nullable|numeric|min:0',
@@ -92,6 +93,11 @@ class PropertyController extends Controller
      */
     public function show(Property $property)
     {
+        // PRIVACY CHECK: Only owner can view property
+        if ($property->owner_id !== Auth::id()) {
+            abort(403);
+        }
+        
         $property->load('images', 'owner');
         return view('properties.show', compact('property'));
     }
@@ -99,29 +105,27 @@ class PropertyController extends Controller
     /**
      * Show the form for editing the specified property.
      */
-
     public function edit(Property $property)
     {
-        // Check authorization first
+        // PRIVACY CHECK: Only owner can edit property
         if (Auth::id() !== $property->owner_id) {
             abort(403);
         }
 
-        // Load the images relationship - this is crucial
         $property->load('images');
-        
-        // You can also load the owner if needed
-        // $property->load('images', 'owner');
-        
         return view('properties.edit', compact('property'));
     }
 
     /**
      * Update the specified property in storage.
      */
-
     public function update(Request $request, Property $property)
     {
+        // PRIVACY CHECK: Only owner can update property
+        if (Auth::id() !== $property->owner_id) {
+            abort(403);
+        }
+
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'description' => 'required|string',
@@ -181,7 +185,7 @@ class PropertyController extends Controller
                 // Create image record
                 $property->images()->create([
                     'image_path' => $path,
-                    'is_main' => $property->images()->count() === 0, // First image is main
+                    'is_main' => $property->images()->count() === 0,
                 ]);
             }
         }
@@ -189,17 +193,26 @@ class PropertyController extends Controller
         return redirect()->route('properties.show', $property)->with('success', 'Property updated successfully!');
     }
 
-
     /**
      * Remove the specified property from storage.
      */
     public function destroy(Property $property)
     {
-        $this->authorizeOwner($property);
+        // PRIVACY CHECK: Only owner can delete property
+        if (Auth::id() !== $property->owner_id) {
+            abort(403);
+        }
 
+        // Load images relationship to ensure it's not null
+        $property->load('images');
+        
         // Delete all images from storage
-        foreach ($property->images as $image) {
-            Storage::disk('public')->delete($image->image_path);
+        if ($property->images) {
+            foreach ($property->images as $image) {
+                if ($image->image_path) {
+                    Storage::disk('public')->delete($image->image_path);
+                }
+            }
         }
 
         $property->delete();
@@ -214,6 +227,7 @@ class PropertyController extends Controller
     {
         $image = \App\Models\Image::findOrFail($image);
 
+        // PRIVACY CHECK: Only owner can set main image
         if (Auth::id() !== $image->property->owner_id) {
             abort(403);
         }
@@ -232,6 +246,7 @@ class PropertyController extends Controller
     {
         $image = \App\Models\Image::findOrFail($image);
 
+        // PRIVACY CHECK: Only owner can delete image
         if (Auth::id() !== $image->property->owner_id) {
             abort(403);
         }
@@ -252,23 +267,5 @@ class PropertyController extends Controller
         $image->delete();
 
         return back()->with('success', 'Image deleted.');
-    }
-
-    /**
-     * Authorize that the current user owns the property.
-     */
-    private function authorizeOwner($model)
-    {
-        if ($model instanceof Property) {
-            $ownerId = $model->owner_id;
-        } elseif (method_exists($model, 'property')) {
-            $ownerId = $model->property->owner_id;
-        } else {
-            abort(403);
-        }
-
-        if (Auth::id() !== $ownerId) {
-            abort(403, 'You are not authorized to perform this action.');
-        }
     }
 }

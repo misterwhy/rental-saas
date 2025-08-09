@@ -1,0 +1,446 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\RentPayment;
+use App\Models\Property;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+
+class RentPaymentController extends Controller
+{
+    /**
+     * Display payment dashboard with search
+     */
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+        
+        // Initialize variables
+        $totalReceived = 0;
+        $totalPending = 0;
+        $overdueCount = 0;
+        $totalPaid = 0;
+        
+        // Search parameters
+        $search = $request->get('search');
+        $status = $request->get('status');
+        $propertyId = $request->get('property_id');
+        $month = $request->get('month');
+        
+        if ($user->isLandlord()) {
+            // Build query for landlords
+            $query = RentPayment::with(['property', 'tenant'])
+                ->whereHas('property', function ($query) use ($user) {
+                    $query->where('owner_id', $user->id);
+                });
+            
+            // Apply search filters
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->whereHas('property', function($qp) use ($search) {
+                        $qp->where('name', 'like', "%{$search}%");
+                    })->orWhereHas('tenant', function($qt) use ($search) {
+                        $qt->where('name', 'like', "%{$search}%");
+                    });
+                });
+            }
+            
+            if ($status) {
+                $query->where('status', $status);
+            }
+            
+            if ($propertyId) {
+                $query->where('property_id', $propertyId);
+            }
+            
+            if ($month) {
+                $query->whereMonth('due_date', date('m', strtotime($month)))
+                      ->whereYear('due_date', date('Y', strtotime($month)));
+            }
+            
+            $payments = $query->latest()->paginate(20)->appends($request->except('page'));
+            
+            // Get payment statistics for landlords
+            $statsQuery = RentPayment::whereHas('property', function ($query) use ($user) {
+                $query->where('owner_id', $user->id);
+            });
+            
+            if ($search) {
+                $statsQuery->where(function($q) use ($search) {
+                    $q->whereHas('property', function($qp) use ($search) {
+                        $qp->where('name', 'like', "%{$search}%");
+                    })->orWhereHas('tenant', function($qt) use ($search) {
+                        $qt->where('name', 'like', "%{$search}%");
+                    });
+                });
+            }
+            
+            if ($status) {
+                $statsQuery->where('status', $status);
+            }
+            
+            if ($propertyId) {
+                $statsQuery->where('property_id', $propertyId);
+            }
+            
+            if ($month) {
+                $statsQuery->whereMonth('due_date', date('m', strtotime($month)))
+                          ->whereYear('due_date', date('Y', strtotime($month)));
+            }
+            
+            $totalReceived = (clone $statsQuery)->where('status', 'paid')->sum('amount');
+            $totalPending = (clone $statsQuery)->where('status', 'pending')->sum('amount');
+            $overdueCount = (clone $statsQuery)->overdue()->count();
+            
+            // Get properties for filter dropdown
+            $properties = Property::where('owner_id', $user->id)->get();
+            
+        } else {
+            // Build query for tenants
+            $query = RentPayment::with(['property'])
+                ->where('tenant_id', $user->id);
+            
+            // Apply search filters
+            if ($search) {
+                $query->whereHas('property', function($qp) use ($search) {
+                    $qp->where('name', 'like', "%{$search}%");
+                });
+            }
+            
+            if ($status) {
+                $query->where('status', $status);
+            }
+            
+            if ($propertyId) {
+                $query->where('property_id', $propertyId);
+            }
+            
+            if ($month) {
+                $query->whereMonth('due_date', date('m', strtotime($month)))
+                      ->whereYear('due_date', date('Y', strtotime($month)));
+            }
+            
+            $payments = $query->latest()->paginate(20)->appends($request->except('page'));
+            
+            // Get payment statistics for tenants
+            $statsQuery = RentPayment::where('tenant_id', $user->id);
+            
+            if ($search) {
+                $statsQuery->whereHas('property', function($qp) use ($search) {
+                    $qp->where('name', 'like', "%{$search}%");
+                });
+            }
+            
+            if ($status) {
+                $statsQuery->where('status', $status);
+            }
+            
+            if ($propertyId) {
+                $statsQuery->where('property_id', $propertyId);
+            }
+            
+            if ($month) {
+                $statsQuery->whereMonth('due_date', date('m', strtotime($month)))
+                          ->whereYear('due_date', date('Y', strtotime($month)));
+            }
+            
+            $totalPaid = (clone $statsQuery)->where('status', 'paid')->sum('amount');
+            $totalPending = (clone $statsQuery)->where('status', 'pending')->sum('amount');
+            $overdueCount = (clone $statsQuery)->overdue()->count();
+            
+            // Tenants don't need property filter dropdown
+            $properties = collect();
+        }
+
+        return view('rent-payments.index', compact(
+            'payments', 
+            'totalReceived', 
+            'totalPending', 
+            'overdueCount', 
+            'totalPaid',
+            'properties',
+            'search',
+            'status',
+            'propertyId',
+            'month'
+        ));
+    }
+
+    /**
+     * Show the form for creating a new rent payment
+     */
+    public function create()
+    {
+        $user = Auth::user();
+        
+        if (!$user->isLandlord()) {
+            abort(403);
+        }
+        
+        $properties = Property::where('owner_id', $user->id)->get();
+        $tenants = User::where('user_type', 'tenant')->get();
+        
+        return view('rent-payments.create', compact('properties', 'tenants'));
+    }
+
+    /**
+     * Store a newly created rent payment
+     */
+    public function store(Request $request)
+    {
+        $user = Auth::user();
+        
+        if (!$user->isLandlord()) {
+            abort(403);
+        }
+        
+        $validated = $request->validate([
+            'property_id' => 'required|exists:properties,id',
+            'tenant_id' => 'required|exists:users,id',
+            'due_date' => 'required|date',
+            'payment_method' => 'nullable|string|max:255',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+        
+        // Verify property belongs to user and get the purchase_price
+        $property = Property::where('id', $request->property_id)
+            ->where('owner_id', $user->id)
+            ->firstOrFail();
+        
+        // Use purchase_price as the rent amount
+        $amount = $property->purchase_price > 0;
+        
+        $payment = RentPayment::create([
+            'property_id' => $request->property_id,
+            'tenant_id' => $request->tenant_id,
+            'amount' => $amount, // Use purchase_price as rent amount
+            'due_date' => $request->due_date,
+            'payment_method' => $request->payment_method,
+            'status' => 'pending',
+            'notes' => $request->notes,
+        ]);
+
+        return redirect()->route('rent-payments.index')->with('success', 'Rent payment created successfully!');
+    }
+
+    /**
+     * Display the specified rent payment
+     */
+    public function show(RentPayment $rentPayment)
+    {
+        $user = Auth::user();
+        
+        // Check authorization
+        if ($user->isLandlord()) {
+            if ($rentPayment->property->owner_id !== $user->id) {
+                abort(403);
+            }
+        } else {
+            if ($rentPayment->tenant_id !== $user->id) {
+                abort(403);
+            }
+        }
+        
+        return view('rent-payments.show', compact('rentPayment'));
+    }
+
+    /**
+     * Show the form for editing the specified rent payment
+     */
+    public function edit(RentPayment $rentPayment)
+    {
+        $user = Auth::user();
+        
+        if (!$user->isLandlord()) {
+            abort(403);
+        }
+        
+        // Check authorization
+        if ($rentPayment->property->owner_id !== $user->id) {
+            abort(403);
+        }
+        
+        $properties = Property::where('owner_id', $user->id)->get();
+        $tenants = User::where('user_type', 'tenant')->get();
+        
+        return view('rent-payments.edit', compact('rentPayment', 'properties', 'tenants'));
+    }
+
+    /**
+     * Update the specified rent payment
+     */
+    public function update(Request $request, RentPayment $rentPayment)
+    {
+        $user = Auth::user();
+        
+        if (!$user->isLandlord()) {
+            abort(403);
+        }
+        
+        // Check authorization
+        if ($rentPayment->property->owner_id !== $user->id) {
+            abort(403);
+        }
+        
+        $validated = $request->validate([
+            'property_id' => 'required|exists:properties,id',
+            'tenant_id' => 'required|exists:users,id',
+            'due_date' => 'required|date',
+            'payment_method' => 'nullable|string|max:255',
+            'status' => 'required|in:pending,paid,overdue',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+        
+        // Verify property belongs to user and get the purchase_price
+        $property = Property::where('id', $request->property_id)
+            ->where('owner_id', $user->id)
+            ->firstOrFail();
+        
+        // Use purchase_price as the rent amount
+        $amount = $property->purchase_price > 0 ? $property->purchase_price : 1000;
+        
+        $rentPayment->update([
+            'property_id' => $request->property_id,
+            'tenant_id' => $request->tenant_id,
+            'amount' => $amount, // Use purchase_price as rent amount
+            'due_date' => $request->due_date,
+            'payment_method' => $request->payment_method,
+            'status' => $request->status,
+            'notes' => $request->notes,
+        ]);
+
+        return redirect()->route('rent-payments.index')->with('success', 'Rent payment updated successfully!');
+    }
+
+    /**
+     * Remove the specified rent payment
+     */
+    public function destroy(RentPayment $rentPayment)
+    {
+        $user = Auth::user();
+        
+        if (!$user->isLandlord()) {
+            abort(403);
+        }
+        
+        // Check authorization
+        if ($rentPayment->property->owner_id !== $user->id) {
+            abort(403);
+        }
+        
+        $rentPayment->delete();
+
+        return redirect()->route('rent-payments.index')->with('success', 'Rent payment deleted successfully!');
+    }
+
+    /**
+     * Mark payment as paid
+     */
+    public function markAsPaid(Request $request, RentPayment $rentPayment)
+    {
+        $user = Auth::user();
+        
+        // Only property owner can mark payment as paid
+        if ($rentPayment->property->owner_id !== $user->id) {
+            abort(403);
+        }
+
+        $rentPayment->update([
+            'status' => 'paid',
+            'payment_date' => now(),
+            'payment_method' => $request->payment_method ?? 'cash',
+        ]);
+
+        // Return JSON response for AJAX requests
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment marked as paid successfully!',
+                'status' => 'paid',
+                'status_badge' => 'success',
+                'payment_date' => $rentPayment->payment_date->format('M d, Y')
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Payment marked as paid successfully!');
+    }
+
+    /**
+     * Generate monthly payments for properties
+     */
+    public function generateMonthlyPayments(Request $request)
+    {
+        $user = Auth::user();
+        
+        // Get properties owned by the current user that have tenants
+        $properties = Property::where('owner_id', $user->id)
+            ->whereNotNull('tenant_id')
+            ->get();
+        
+        $paymentsCreated = 0;
+        
+        foreach ($properties as $property) {
+            // Check if payment already exists for this month
+            $startOfMonth = now()->startOfMonth();
+            $endOfMonth = now()->endOfMonth();
+            
+            $existingPayment = RentPayment::where('property_id', $property->id)
+                ->whereBetween('due_date', [$startOfMonth, $endOfMonth])
+                ->first();
+                
+            if (!$existingPayment && $property->tenant_id) {
+                // Use the purchase_price as the monthly rent amount
+                $monthlyRent = $property->purchase_price > 0 ? $property->purchase_price : 1000;
+                
+                // Create payment for this month
+                RentPayment::create([
+                    'property_id' => $property->id,
+                    'tenant_id' => $property->tenant_id,
+                    'amount' => $monthlyRent,
+                    'due_date' => now()->endOfMonth(),
+                    'status' => 'pending',
+                ]);
+                $paymentsCreated++;
+            }
+        }
+
+        $message = $paymentsCreated > 0 
+            ? "{$paymentsCreated} monthly payments generated successfully!"
+            : "No new payments generated. Make sure properties have tenants assigned.";
+
+        // Return JSON response for AJAX requests
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'payments_created' => $paymentsCreated
+            ]);
+        }
+
+        return redirect()->back()->with('success', $message);
+    }
+
+    /**
+     * Get tenant for a property (AJAX)
+     */
+    public function getPropertyTenant($propertyId)
+    {
+        $user = Auth::user();
+        
+        $property = Property::where('id', $propertyId)
+            ->where('owner_id', $user->id)
+            ->first();
+            
+        if (!$property) {
+            return response()->json(['error' => 'Property not found'], 404);
+        }
+        
+        return response()->json([
+            'tenant_id' => $property->tenant_id,
+            'tenant_name' => $property->tenant ? $property->tenant->name : null
+        ]);
+    }
+}

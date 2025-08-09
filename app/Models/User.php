@@ -21,7 +21,8 @@ class User extends Authenticatable
         'email',
         'password',
         'user_type',
-        'phone', // Add this if you're using it
+        'phone',
+        'profile_photo_path', // Add this
     ];
 
     /**
@@ -67,10 +68,16 @@ class User extends Authenticatable
         return $this->user_type === 'tenant';
     }
 
-        public function properties()
+    public function properties()
     {
         return $this->hasMany(Property::class, 'owner_id');
     }
 
-
+    // Add this method to get profile photo URL
+    public function getProfilePhotoUrlAttribute()
+    {
+        return $this->profile_photo_path 
+            ? asset('storage/' . $this->profile_photo_path) 
+            : asset('images/default-profile.png'); // Default photo
+    }
 }

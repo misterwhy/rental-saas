@@ -5,28 +5,34 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Payment extends Model
+class RentPayment extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'lease_id',
+        'property_id',
         'tenant_id',
+        'lease_id',
         'amount',
+        'due_date',
         'payment_date',
-        'type',
-        'status',
         'payment_method',
-        'transaction_id',
+        'status',
         'notes',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'due_date' => 'date',
         'payment_date' => 'date',
     ];
 
     // Relationships
+    public function property()
+    {
+        return $this->belongsTo(Property::class);
+    }
+
     public function tenant()
     {
         return $this->belongsTo(User::class, 'tenant_id');
@@ -40,7 +46,7 @@ class Payment extends Model
     // Scopes
     public function scopePaid($query)
     {
-        return $query->where('status', 'completed');
+        return $query->where('status', 'paid');
     }
 
     public function scopePending($query)
@@ -48,22 +54,30 @@ class Payment extends Model
         return $query->where('status', 'pending');
     }
 
+    public function scopeOverdue($query)
+    {
+        return $query->where('due_date', '<', now())->where('status', 'pending');
+    }
+
+    // Accessors
+    public function getIsOverdueAttribute()
+    {
+        return $this->status === 'pending' && $this->due_date < now();
+    }
+
     public function getStatusBadgeAttribute()
     {
         $statuses = [
             'pending' => 'warning',
-            'completed' => 'success',
-            'failed' => 'danger',
-            'refunded' => 'secondary',
+            'paid' => 'success',
+            'overdue' => 'danger',
         ];
         
         return $statuses[$this->status] ?? 'secondary';
     }
 
-    // Accessors
-    public function getMonthNameAttribute()
+    public function getMonthYearAttribute()
     {
-        // Assuming 'type' contains month information
-        return $this->type ?? 'Unknown';
+        return $this->due_date->format('F Y');
     }
 }

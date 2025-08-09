@@ -56,14 +56,16 @@
                         </div>
                         <span class="text-sm font-medium">Analytics</span>
                     </a>
-                    
-                    <a href="#" class="flex items-center p-3 text-gray-600 hover:bg-gray-600 hover:text-white rounded-3xl transition-colors duration-200">
+
+
+                    <a href="{{ route('rent-payments.index') }}"
+                    class="flex items-center p-3 text-gray-600 hover:bg-gray-600 hover:text-white rounded-3xl transition-colors duration-200">
                         <div class="sidebar-icon rounded-lg p-1.5 mr-3 hover:text-white">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                             </svg>
                         </div>
-                        <span class="text-sm font-medium">Payments</span>
+                        <span class="text-sm font-medium">Rent Payments</span>
                     </a>
                     
                     <a href="#" class="flex items-center p-3 text-gray-600 hover:bg-gray-600 hover:text-white rounded-3xl transition-colors duration-200">
@@ -94,9 +96,17 @@
             <!-- User Profile -->
             <div class="absolute bottom-10 left-10">
                 <div class="flex items-center">
-                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face&auto=format" alt="Profile" class="w-12 h-12 rounded-full">
+                    <a href="{{ route('profile.show') }}" class="flex items-center">
+                        <img src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" class="w-12 h-12 rounded-full mr-3">
+                        <div>
+                        <span class="text-gray-600 hover:text-gray-800 font-semibold">{{ Auth::user()->name }}</span>
+                        </div>
+                    </a>
                 </div>
+
+
             </div>
+
         </div>
 
         <!-- Main Content -->
