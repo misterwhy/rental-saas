@@ -145,23 +145,42 @@
                             @enderror
                         </div>
 
-                        <!-- Tenant Assignment -->
+                        <!-- Tenant Assignment Section -->
                         <div class="md:col-span-2">
-                            <label for="tenant_id" class="block text-sm font-medium text-gray-700 mb-2">Assign Tenant (Optional)</label>
-                            <select id="tenant_id" name="tenant_id"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors @error('tenant_id') border-red-300 @enderror">
-                                <option value="">No tenant assigned</option>
-                                @foreach(App\Models\User::where('user_type', 'tenant')->get() as $tenant)
-                                    <option value="{{ $tenant->id }}" {{ old('tenant_id') == $tenant->id ? 'selected' : '' }}>
-                                        {{ $tenant->name }} ({{ $tenant->email }})
-                                    </option>
-                                @endforeach
-                            </select>
-                            <p class="mt-2 text-sm text-gray-500">You can assign a tenant to this property now or later.</p>
-                            @error('tenant_id')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                            <fieldset class="border border-gray-300 rounded-lg p-4">
+                                <legend class="text-sm font-medium text-gray-700 px-2">Assign Tenant (Optional)</legend>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                                    <div>
+                                        <label for="tenant_name" class="block text-sm font-medium text-gray-700 mb-1">Tenant Name</label>
+                                        <input type="text" id="tenant_name" name="tenant_name" value="{{ old('tenant_name') }}"
+                                            placeholder="John Doe"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('tenant_name') border-red-500 @enderror">
+                                        @error('tenant_name')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div>
+                                        <label for="tenant_email" class="block text-sm font-medium text-gray-700 mb-1">Tenant Email</label>
+                                        <input type="email" id="tenant_email" name="tenant_email" value="{{ old('tenant_email') }}"
+                                            placeholder="tenant@example.com"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('tenant_email') border-red-500 @enderror">
+                                        @error('tenant_email')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                        <p class="mt-1 text-xs text-gray-500">If the email doesn't exist, a new tenant account will be created.</p>
+                                    </div>
+                                </div>
+                                @if(session('tenant_temp_info')) {{-- Example for displaying temp password (NOT SECURE) --}}
+                                    <div class="mt-3 p-3 bg-yellow-100 text-yellow-800 text-sm rounded-md">
+                                        {{ session('tenant_temp_info') }}
+                                    </div>
+                                @endif
+                            </fieldset>
                         </div>
+
+
+
+
                     </div>
                 </div>
 

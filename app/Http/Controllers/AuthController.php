@@ -24,7 +24,17 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            // Optional: Redirect to intended page or dashboard
+            $user = Auth::user();
+
+            // --- Redirect Logic Based on User Type ---
+            // Check if the user is a tenant using the user_type column
+            if ($user->user_type === 'tenant') {
+                // Redirect tenant to their property dashboard
+                // Make sure the 'tenant.dashboard' route exists
+                return redirect()->intended(route('tenant.dashboard', absolute: false));
+            }
+
+            // If not a tenant (assume landlord), redirect to landlord dashboard
             return redirect()->intended(route('dashboard', absolute: false));
         }
 
@@ -61,7 +71,15 @@ class AuthController extends Controller
         // Log the user in automatically after registration
         Auth::login($user);
 
-        // Redirect to the dashboard after successful registration
+        // --- Redirect Logic After Registration ---
+        // Check if the newly registered user is a tenant
+        if ($user->user_type === 'tenant') {
+             // Redirect tenant to their property dashboard
+             // Make sure the 'tenant.dashboard' route exists
+            return redirect()->route('tenant.dashboard');
+        }
+
+        // If not a tenant (assume landlord), redirect to landlord dashboard
         return redirect()->route('dashboard');
     }
 

@@ -48,6 +48,41 @@
         </div>
         @endif
 
+        <!-- Tenant Assignment Section -->
+        <div class="md:col-span-2">
+            <fieldset class="border border-gray-300 rounded-lg p-4">
+                <legend class="text-sm font-medium text-gray-700 px-2">Assign Tenant (Optional)</legend>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                    <div>
+                        <label for="tenant_name" class="block text-sm font-medium text-gray-700 mb-1">Tenant Name</label>
+                        <input type="text" id="tenant_name" name="tenant_name"
+                            value="{{ old('tenant_name', $property->tenant->name ?? '') }}"
+                            placeholder="John Doe"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('tenant_name') border-red-500 @enderror">
+                        @error('tenant_name')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label for="tenant_email" class="block text-sm font-medium text-gray-700 mb-1">Tenant Email</label>
+                        <input type="email" id="tenant_email" name="tenant_email"
+                            value="{{ old('tenant_email', $property->tenant->email ?? '') }}"
+                            placeholder="tenant@example.com"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('tenant_email') border-red-500 @enderror">
+                        @error('tenant_email')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                        @if($property->tenant)
+                            <p class="mt-1 text-xs text-gray-500">Leave blank to keep the current tenant ({{ $property->tenant->name }}).</p>
+                        @else
+                            <p class="mt-1 text-xs text-gray-500">If the email doesn't exist, a new tenant account will be created.</p>
+                        @endif
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+
+
         <!-- Basic Information -->
         <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
             <h2 class="text-lg font-medium text-gray-900 mb-4">Basic Information</h2>
