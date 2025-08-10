@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Property;
+use App\Models\RentPayment;
 use App\Models\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -58,21 +59,22 @@ class PropertyController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $property = Property::create([
-            'name' => $request->title,
-            'description' => $request->description,
-            'address' => $request->address,
-            'city' => $request->city,
-            'state' => $request->state,
-            'zip_code' => $request->zip_code,
-            'country' => $request->country,
-            'property_type' => $request->property_type,
-            'number_of_units' => $request->number_of_units,
-            'purchase_date' => $request->purchase_date,
-            'purchase_price' => $request->purchase_price,
-            'amenities' => $request->amenities ?? [],
-            'owner_id' => Auth::id(),
-        ]);
+    $property = Property::create([
+        'name' => $request->title,
+        'description' => $request->description,
+        'address' => $request->address,
+        'city' => $request->city,
+        'state' => $request->state,
+        'zip_code' => $request->zip_code,
+        'country' => $request->country,
+        'property_type' => $request->property_type,
+        'number_of_units' => $request->number_of_units,
+        'purchase_date' => $request->purchase_date,
+        'purchase_price' => $request->purchase_price,
+        'amenities' => $request->amenities ?? [],
+        'owner_id' => Auth::id(),
+        'tenant_id' => $request->tenant_id, // Add this line
+    ]);
 
         // Handle image uploads
         if ($request->hasFile('images')) {
@@ -89,18 +91,32 @@ class PropertyController extends Controller
     }
 
     /**
-     * Display the specified property.
+     * Display the specified property.                   
      */
-    public function show(Property $property)
-    {
-        // PRIVACY CHECK: Only owner can view property
-        if ($property->owner_id !== Auth::id()) {
-            abort(403);
-        }
-        
-        $property->load('images', 'owner');
-        return view('properties.show', compact('property'));
+public function show(Property $property)
+{
+    // PRIVACY CHECK: Only owner can view property
+    if ($property->owner_id !== Auth::id()) {
+        abort(403);
     }
+    
+    $property->load('images', 'owner');
+    
+    // Debug: Check if images are loaded
+    \Log::info('Property images count', [
+        'property_id' => $property->id,
+        'images_count' => $property->images ? $property->images->count() : 'null',
+        'images_type' => gettype($property->images)
+    ]);
+    
+    // Get rent payments for this property (if you want to display them)
+    $rentPayments = RentPayment::where('property_id', $property->id)
+        ->with(['tenant'])
+        ->latest()
+        ->get();
+    
+    return view('properties.show', compact('property', 'rentPayments'));
+}
 
     /**
      * Show the form for editing the specified property.
@@ -162,6 +178,7 @@ class PropertyController extends Controller
             'purchase_date' => $request->purchase_date,
             'purchase_price' => $request->purchase_price,
             'amenities' => $request->amenities ?? [],
+            'tenant_id' => $request->tenant_id, // Add this line
         ]);
 
         // Remove images that were marked for deletion

@@ -9,16 +9,19 @@
                     <h2 class="text-xl font-semibold text-gray-800">Rent Payment Management</h2>
                     <div class="flex space-x-2">
                         @if(Auth::user()->isLandlord())
-                            <button type="button" 
-                                    id="generate-payments-btn"
-                                    class="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                                </svg>
-                                Generate Monthly
-                            </button>
+                            <form action="{{ route('rent-payments.generate') }}" method="POST" class="inline-block">
+                                @csrf
+                                <button type="submit" 
+                                        class="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                    </svg>
+                                    Generate Monthly
+                                </button>
+                            </form>
+                            
                             <a href="{{ route('rent-payments.create') }}" 
-                               class="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                            class="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 ml-2">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                                 </svg>
@@ -134,7 +137,70 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200" id="payments-table-body">
                         @forelse($payments as $payment)
-                            @include('rent-payments.partials.payment-row', ['payment' => $payment])
+                            <tr class="hover:bg-gray-50" data-payment-id="{{ $payment->id }}">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">
+                                        {{ $payment->property->name ?? 'Unknown Property' }}
+                                    </div>
+                                    <div class="text-sm text-gray-500">
+                                        @if(Auth::user()->isLandlord())
+                                            Tenant: {{ $payment->tenant->name ?? 'Unknown Tenant' }}
+                                        @else
+                                            Due: {{ $payment->month_year }}
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">${{ number_format($payment->amount, 2) }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">{{ $payment->due_date->format('M d, Y') }}</div>
+                                    @if($payment->payment_date)
+                                        <div class="text-xs text-gray-500">Paid: {{ $payment->payment_date->format('M d, Y') }}</div>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{{ $payment->status_badge }}-100 text-{{ $payment->status_badge }}-800">
+                                        {{ ucfirst($payment->status) }}
+                                    </span>
+                                    @if($payment->is_overdue)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 ml-1">
+                                            Overdue
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    @if(Auth::user()->isLandlord())
+                                        @if($payment->status === 'pending')
+                                            <button type="button" 
+                                                    onclick="showMarkPaidModal({{ $payment->id }})"
+                                                    class="text-green-600 hover:text-green-900 mr-3">
+                                                Mark Paid
+                                            </button>
+                                        @endif
+                                        <!-- Delete button for ALL payments (pending or paid) -->
+                                        <button type="button" 
+                                                onclick="showDeleteModal({{ $payment->id }})"
+                                                class="text-red-600 hover:text-red-900 mr-3">
+                                            Delete
+                                        </button>
+                                    @endif
+                                
+                                    
+                                    <a href="{{ route('rent-payments.show', $payment) }}" class="text-blue-600 hover:text-blue-900">
+                                        View
+                                    </a>
+
+                                    <a href="{{ route('rent-payments.pdf', $payment) }}" 
+                                    target="_blank"
+                                    class="text-gray-600 hover:text-gray-900 mr-3  pl-10">
+                                        <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                                        </svg>
+                                    </a>
+                                </td>
+                                
+                            </tr>
                         @empty
                             <tr>
                                 <td colspan="5" class="px-6 py-4 text-center text-gray-500">
@@ -193,118 +259,77 @@
                     <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm">
                         Mark as Paid
                     </button>
-                    <button type="button" onclick="document.getElementById('mark-paid-modal').classList.add('hidden')" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                    <button type="button" onclick="hideMarkPaidModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                         Cancel
                     </button>
                 </div>
-                
             </form>
         </div>
     </div>
 </div>
 
+<!-- Delete Payment Modal -->
+@if(Auth::user()->isLandlord())
+<div id="delete-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto z-50">
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="bg-white rounded-lg shadow-xl transform transition-all sm:max-w-lg w-full">
+            <form id="delete-form" method="POST">
+                @csrf
+                @method('DELETE')
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">Delete Payment</h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500">
+                                    Are you sure you want to delete this payment? This action cannot be undone.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Delete Payment
+                    </button>
+                    <button type="button" onclick="hideDeleteModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
+
+
+
 <script>
-// Auto-refresh functionality
-let refreshInterval;
-
-function startAutoRefresh() {
-    refreshInterval = setInterval(function() {
-        // Reload the search form to refresh data
-        const formData = new FormData(document.getElementById('search-form'));
-        const searchParams = new URLSearchParams();
-        for (const [key, value] of formData) {
-            if (value) {
-                searchParams.append(key, value);
-            }
-        }
-        
-        fetch('{{ route('rent-payments.index') }}?' + searchParams.toString(), {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.text())
-        .then(html => {
-            // Parse the response and update the table
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const newTableBody = doc.querySelector('#payments-table-body');
-            if (newTableBody) {
-                document.querySelector('#payments-table-body').innerHTML = newTableBody.innerHTML;
-            }
-        })
-        .catch(error => console.error('Auto-refresh error:', error));
-    }, 30000); // Refresh every 30 seconds
-}
-
-function stopAutoRefresh() {
-    if (refreshInterval) {
-        clearInterval(refreshInterval);
-    }
-}
-
-// Generate monthly payments with AJAX
-document.getElementById('generate-payments-btn').addEventListener('click', function() {
-    if (confirm('Are you sure you want to generate monthly payments for all properties with tenants?')) {
-        fetch('{{ route('rent-payments.generate') }}', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'X-Requested-With': 'XMLHttpRequest',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                // Refresh the page to show new payments
-                location.reload();
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error generating payments');
-        });
-    }
-});
-
-// Mark payment as paid with AJAX
+// Mark payment as paid (SIMPLE VERSION - NO AJAX)
 function showMarkPaidModal(paymentId) {
     const form = document.getElementById('mark-paid-form');
     form.action = `/rent-payments/${paymentId}/mark-paid`;
     document.getElementById('mark-paid-modal').classList.remove('hidden');
 }
 
-// Handle mark paid form submission with AJAX
-document.getElementById('mark-paid-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const form = this;
-    const formData = new FormData(form);
-    
-    fetch(form.action, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            document.getElementById('mark-paid-modal').classList.add('hidden');
-            // Refresh the page to show updated status
-            location.reload();
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error marking payment as paid');
-    });
-});
+function hideMarkPaidModal() {
+    document.getElementById('mark-paid-modal').classList.add('hidden');
+}
+
+// Delete payment (SIMPLE VERSION - NO AJAX)
+function showDeleteModal(paymentId) {
+    document.getElementById('delete-form').action = `/rent-payments/${paymentId}`;
+    document.getElementById('delete-modal').classList.remove('hidden');
+}
+
+function hideDeleteModal() {
+    document.getElementById('delete-modal').classList.add('hidden');
+}
 
 // Clear filters
 function clearFilters() {
@@ -315,22 +340,25 @@ function clearFilters() {
     document.getElementById('search-form').submit();
 }
 
-// Close modal when clicking outside
+// Close modals when clicking outside or pressing Escape
 document.addEventListener('click', function(event) {
-    const modal = document.getElementById('mark-paid-modal');
-    if (modal && !modal.classList.contains('hidden') && event.target === modal) {
-        modal.classList.add('hidden');
+    const markPaidModal = document.getElementById('mark-paid-modal');
+    const deleteModal = document.getElementById('delete-modal');
+    
+    if (markPaidModal && !markPaidModal.classList.contains('hidden') && event.target === markPaidModal) {
+        hideMarkPaidModal();
+    }
+    
+    if (deleteModal && !deleteModal.classList.contains('hidden') && event.target === deleteModal) {
+        hideDeleteModal();
     }
 });
 
-// Start auto-refresh when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    startAutoRefresh();
-});
-
-// Stop auto-refresh when leaving page
-window.addEventListener('beforeunload', function() {
-    stopAutoRefresh();
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        hideMarkPaidModal();
+        hideDeleteModal();
+    }
 });
 </script>
 @endsection

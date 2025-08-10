@@ -42,27 +42,20 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/properties/images/{image}', [PropertyController::class, 'deleteImage'])->name('properties.images.delete');
     Route::post('/properties/images/{image}/set-main', [PropertyController::class, 'setMainImage'])->name('properties.images.set-main');
     
-    // Payment Routes
-    Route::prefix('payments')->group(function () {
+    Route::prefix('rent-payments')->group(function () {
+        Route::get('/', [RentPaymentController::class, 'index'])->name('rent-payments.index');
+        Route::get('/create', [RentPaymentController::class, 'create'])->name('rent-payments.create');
+        Route::post('/', [RentPaymentController::class, 'store'])->name('rent-payments.store');
+        Route::get('/{rentPayment}', [RentPaymentController::class, 'show'])->name('rent-payments.show');
+        Route::get('/{rentPayment}/edit', [RentPaymentController::class, 'edit'])->name('rent-payments.edit');
+        Route::put('/{rentPayment}', [RentPaymentController::class, 'update'])->name('rent-payments.update');
+        Route::delete('/{rentPayment}', [RentPaymentController::class, 'destroy'])->name('rent-payments.destroy'); // Make sure this exists
+        
+        Route::get('/{rentPayment}/pdf', [RentPaymentController::class, 'downloadPDF'])->name('rent-payments.pdf');
 
-    Route::get('/', [RentPaymentController::class, 'index'])->name('rent-payments.index');
-    Route::get('/create', [RentPaymentController::class, 'create'])->name('rent-payments.create');
-    Route::post('/', [RentPaymentController::class, 'store'])->name('rent-payments.store');
-    Route::get('/{rentPayment}', [RentPaymentController::class, 'show'])->name('rent-payments.show');
-    Route::get('/{rentPayment}/edit', [RentPaymentController::class, 'edit'])->name('rent-payments.edit');
-    Route::put('/{rentPayment}', [RentPaymentController::class, 'update'])->name('rent-payments.update');
-    Route::delete('/{rentPayment}', [RentPaymentController::class, 'destroy'])->name('rent-payments.destroy');
-    
-    Route::post('/{rentPayment}/mark-paid', [RentPaymentController::class, 'markAsPaid'])->name('rent-payments.mark-paid');
-    Route::post('/generate-monthly', [RentPaymentController::class, 'generateMonthlyPayments'])->name('rent-payments.generate');
-    Route::get('/property/{propertyId}/tenant', [RentPaymentController::class, 'getPropertyTenant'])->name('rent-payments.property-tenant');
-    
+        Route::post('/{rentPayment}/mark-paid', [RentPaymentController::class, 'markAsPaid'])->name('rent-payments.mark-paid');
+        Route::post('/generate-monthly', [RentPaymentController::class, 'generateMonthlyPayments'])->name('rent-payments.generate');
+        Route::get('/property/{propertyId}/tenant', [RentPaymentController::class, 'getPropertyTenant'])->name('rent-payments.property-tenant');
     });
 
-    Route::prefix('rent-payments')->group(function () {
-    Route::get('/', [RentPaymentController::class, 'index'])->name('rent-payments.index');
-    Route::get('/property/{propertyId}', [RentPaymentController::class, 'propertyPayments'])->name('rent-payments.property');
-    Route::post('/{rentPayment}/mark-paid', [RentPaymentController::class, 'markAsPaid'])->name('rent-payments.mark-paid');
-    Route::post('/generate-monthly', [RentPaymentController::class, 'generateMonthlyPayments'])->name('rent-payments.generate');
-});
 });

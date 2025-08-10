@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class RentPaymentController extends Controller
 {
@@ -339,6 +340,7 @@ class RentPaymentController extends Controller
     /**
      * Mark payment as paid
      */
+
     public function markAsPaid(Request $request, RentPayment $rentPayment)
     {
         $user = Auth::user();
@@ -354,19 +356,9 @@ class RentPaymentController extends Controller
             'payment_method' => $request->payment_method ?? 'cash',
         ]);
 
-        // Return JSON response for AJAX requests
-        if ($request->ajax()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Payment marked as paid successfully!',
-                'status' => 'paid',
-                'status_badge' => 'success',
-                'payment_date' => $rentPayment->payment_date->format('M d, Y')
-            ]);
-        }
-
         return redirect()->back()->with('success', 'Payment marked as paid successfully!');
     }
+
 
     /**
      * Generate monthly payments for properties
@@ -375,14 +367,37 @@ class RentPaymentController extends Controller
     {
         $user = Auth::user();
         
-        // Get properties owned by the current user that have tenants
-        $properties = Property::where('owner_id', $user->id)
-            ->whereNotNull('tenant_id')
-            ->get();
+        // Debug: Log the request
+        \Log::info('Generate Monthly Payments Request', [
+            'user_id' => $user->id,
+            'user_type' => $user->user_type
+        ]);
+        
+        // Get ALL properties owned by the current user (not just those with tenants)
+        $properties = Property::where('owner_id', $user->id)->get();
+        
+        // Debug: Log properties found
+        \Log::info('Properties found', [
+            'count' => $properties->count(),
+            'properties' => $properties->map(function($prop) {
+                return [
+                    'id' => $prop->id,
+                    'name' => $prop->name,
+                    'tenant_id' => $prop->tenant_id,
+                    'purchase_price' => $prop->purchase_price
+                ];
+            })
+        ]);
         
         $paymentsCreated = 0;
         
         foreach ($properties as $property) {
+            // Debug: Log each property being processed
+            \Log::info('Processing property', [
+                'property_id' => $property->id,
+                'property_name' => $property->name
+            ]);
+            
             // Check if payment already exists for this month
             $startOfMonth = now()->startOfMonth();
             $endOfMonth = now()->endOfMonth();
@@ -390,15 +405,29 @@ class RentPaymentController extends Controller
             $existingPayment = RentPayment::where('property_id', $property->id)
                 ->whereBetween('due_date', [$startOfMonth, $endOfMonth])
                 ->first();
+            
+            // Debug: Log existing payment check
+            \Log::info('Existing payment check', [
+                'property_id' => $property->id,
+                'existing_payment' => $existingPayment ? $existingPayment->id : null
+            ]);
                 
-            if (!$existingPayment && $property->tenant_id) {
+            // Create payment for ALL properties (even without tenants for testing)
+            if (!$existingPayment) {
                 // Use the purchase_price as the monthly rent amount
                 $monthlyRent = $property->purchase_price > 0 ? $property->purchase_price : 1000;
+                
+                // Debug: Log payment creation attempt
+                \Log::info('Creating payment', [
+                    'property_id' => $property->id,
+                    'amount' => $monthlyRent,
+                    'due_date' => now()->endOfMonth()
+                ]);
                 
                 // Create payment for this month
                 RentPayment::create([
                     'property_id' => $property->id,
-                    'tenant_id' => $property->tenant_id,
+                    'tenant_id' => $property->tenant_id ?? $user->id, // Use tenant_id if exists, otherwise user_id
                     'amount' => $monthlyRent,
                     'due_date' => now()->endOfMonth(),
                     'status' => 'pending',
@@ -409,16 +438,12 @@ class RentPaymentController extends Controller
 
         $message = $paymentsCreated > 0 
             ? "{$paymentsCreated} monthly payments generated successfully!"
-            : "No new payments generated. Make sure properties have tenants assigned.";
+            : "No new payments generated. All properties already have payments for this month.";
 
-        // Return JSON response for AJAX requests
-        if ($request->ajax()) {
-            return response()->json([
-                'success' => true,
-                'message' => $message,
-                'payments_created' => $paymentsCreated
-            ]);
-        }
+        \Log::info('Generate payments completed', [
+            'payments_created' => $paymentsCreated,
+            'message' => $message
+        ]);
 
         return redirect()->back()->with('success', $message);
     }
@@ -443,4 +468,31 @@ class RentPaymentController extends Controller
             'tenant_name' => $property->tenant ? $property->tenant->name : null
         ]);
     }
+
+    public function downloadPDF(RentPayment $rentPayment)
+    {
+        $user = Auth::user();
+        
+        // Check authorization
+        if ($user->isLandlord()) {
+            if ($rentPayment->property->owner_id !== $user->id) {
+                abort(403);
+            }
+        } else {
+            if ($rentPayment->tenant_id !== $user->id) {
+                abort(403);
+            }
+        }
+        
+        // Load the PDF view
+        $pdf = PDF::loadView('rent-payments.pdf', compact('rentPayment'));
+        
+        // Set paper size and orientation
+        $pdf->setPaper('A4', 'portrait');
+        
+        // Download the PDF
+        return $pdf->download("payment-{$rentPayment->id}-receipt.pdf");
+    }
+
+
 }

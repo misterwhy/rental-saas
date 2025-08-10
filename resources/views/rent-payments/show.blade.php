@@ -39,7 +39,7 @@
                             @endif
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Status:</span>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{{ $rentPayment->status_badge }}-100 text-{{ $rentPayment->status_badge }}-800">
+                                <span class=" font-medium bg-{{ $rentPayment->status_badge }}-100 text-{{ $rentPayment->status_badge }}-800">
                                     {{ ucfirst($rentPayment->status) }}
                                 </span>
                             </div>
@@ -106,9 +106,20 @@
                         </div>
                         
                         <div class="flex space-x-3">
+                            <!-- Back to List button -->
                             <a href="{{ route('rent-payments.index') }}" 
                             class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
                                 Back to List
+                            </a>
+                            
+                            <!-- PDF Download button -->
+                            <a href="{{ route('rent-payments.pdf', $rentPayment) }}" 
+                            target="_blank"
+                            class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                                </svg>
+                                Download PDF
                             </a>
                             
                             @if(Auth::user()->isLandlord())
@@ -127,11 +138,6 @@
                                     </button>
                                 @endif
                                 
-                                <!-- Edit button -->
-                                <a href="{{ route('rent-payments.edit', $rentPayment) }}" 
-                                class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                                    Edit
-                                </a>
                             @endif
                         </div>
                     </div>
@@ -152,12 +158,11 @@
     </div>
 </div>
 
-<!-- Mark Paid Modal (if user is landlord) -->
-@if(Auth::user()->isLandlord() && $rentPayment->status === 'pending')
+<!-- Mark Paid Modal -->
 <div id="mark-paid-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto z-50">
     <div class="flex items-center justify-center min-h-screen">
         <div class="bg-white rounded-lg shadow-xl transform transition-all sm:max-w-lg w-full">
-            <form id="mark-paid-form" method="POST" action="{{ route('rent-payments.mark-paid', $rentPayment) }}">
+            <form id="mark-paid-form" method="POST">
                 @csrf
                 @method('POST')
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
@@ -190,7 +195,7 @@
                     <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm">
                         Mark as Paid
                     </button>
-                    <button type="button" onclick="document.getElementById('mark-paid-modal').classList.add('hidden')" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                    <button type="button" onclick="hideMarkPaidModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                         Cancel
                     </button>
                 </div>
@@ -198,7 +203,6 @@
         </div>
     </div>
 </div>
-
 
 <!-- Delete Payment Modal -->
 @if(Auth::user()->isLandlord())
@@ -220,11 +224,6 @@
                             <div class="mt-2">
                                 <p class="text-sm text-gray-500">
                                     Are you sure you want to delete this payment? This action cannot be undone.
-                                    <br><br>
-                                    <strong>Payment Details:</strong><br>
-                                    Amount: $<span id="delete-amount">0.00</span><br>
-                                    Property: <span id="delete-property">Unknown</span><br>
-                                    Period: <span id="delete-period">Unknown</span>
                                 </p>
                             </div>
                         </div>
@@ -234,7 +233,7 @@
                     <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
                         Delete Payment
                     </button>
-                    <button type="button" onclick="document.getElementById('delete-modal').classList.add('hidden')" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                    <button type="button" onclick="hideDeleteModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                         Cancel
                     </button>
                 </div>
@@ -242,43 +241,60 @@
         </div>
     </div>
 </div>
-
-<script>
-// Add this function to show the delete modal
-function showDeleteModal(paymentId) {
-    // Set the form action
-    document.getElementById('delete-form').action = `/rent-payments/${paymentId}`;
-    
-    // Set payment details in the modal (optional - you can fetch these via AJAX)
-    document.getElementById('delete-amount').textContent = '{{ number_format($rentPayment->amount, 2) }}';
-    document.getElementById('delete-property').textContent = '{{ $rentPayment->property->name ?? 'Unknown Property' }}';
-    document.getElementById('delete-period').textContent = '{{ $rentPayment->due_date->format('F Y') }}';
-    
-    // Show the modal
-    document.getElementById('delete-modal').classList.remove('hidden');
-}
-
-// Close modal when clicking outside
-document.addEventListener('click', function(event) {
-    const deleteModal = document.getElementById('delete-modal');
-    if (deleteModal && !deleteModal.classList.contains('hidden') && event.target === deleteModal) {
-        deleteModal.classList.add('hidden');
-    }
-});
-</script>
 @endif
+
+
+
 <script>
+// Mark payment as paid (SIMPLE VERSION - NO AJAX)
 function showMarkPaidModal(paymentId) {
+    const form = document.getElementById('mark-paid-form');
+    form.action = `/rent-payments/${paymentId}/mark-paid`;
     document.getElementById('mark-paid-modal').classList.remove('hidden');
 }
 
-// Close modal when clicking outside
+function hideMarkPaidModal() {
+    document.getElementById('mark-paid-modal').classList.add('hidden');
+}
+
+// Delete payment (SIMPLE VERSION - NO AJAX)
+function showDeleteModal(paymentId) {
+    document.getElementById('delete-form').action = `/rent-payments/${paymentId}`;
+    document.getElementById('delete-modal').classList.remove('hidden');
+}
+
+function hideDeleteModal() {
+    document.getElementById('delete-modal').classList.add('hidden');
+}
+
+// Clear filters
+function clearFilters() {
+    document.querySelector('input[name="search"]').value = '';
+    document.querySelector('select[name="status"]').value = '';
+    document.querySelector('select[name="property_id"]').value = '';
+    document.querySelector('input[name="month"]').value = '';
+    document.getElementById('search-form').submit();
+}
+
+// Close modals when clicking outside or pressing Escape
 document.addEventListener('click', function(event) {
-    const modal = document.getElementById('mark-paid-modal');
-    if (modal && !modal.classList.contains('hidden') && event.target === modal) {
-        modal.classList.add('hidden');
+    const markPaidModal = document.getElementById('mark-paid-modal');
+    const deleteModal = document.getElementById('delete-modal');
+    
+    if (markPaidModal && !markPaidModal.classList.contains('hidden') && event.target === markPaidModal) {
+        hideMarkPaidModal();
+    }
+    
+    if (deleteModal && !deleteModal.classList.contains('hidden') && event.target === deleteModal) {
+        hideDeleteModal();
+    }
+});
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        hideMarkPaidModal();
+        hideDeleteModal();
     }
 });
 </script>
-@endif
 @endsection

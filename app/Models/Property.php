@@ -61,15 +61,13 @@ class Property extends Model
     /**
      * Accessor to get the main image for the property.
      */
+    public function mainImage()
+    {
+        return $this->hasOne(Image::class)->where('is_main', 1);
+    }
     public function getMainImageAttribute()
     {
-        if ($this->relationLoaded('images') && $this->images && $this->images->count() > 0) {
-            $mainImage = $this->images->where('is_main', 1)->first();
-            return $mainImage ?? $this->images->first();
-        }
-
-        $mainImage = $this->images()->where('is_main', 1)->first();
-        return $mainImage ?? $this->images()->first();
+        return $this->images()->where('is_main', 1)->first();
     }
 
     // Financial Calculations
