@@ -59,7 +59,7 @@
                 <p class="mt-1 text-sm text-gray-500">Update your profile information and profile photo.</p>
             </div>
 
-            <form method="POST" action="{{ route(Auth::user()->user_type . '.profile.update') }}" enctype="multipart/form-data" class="p-6" id="edit-form">
+            <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data" class="p-6" id="edit-form">
                 @csrf
                 @method('PUT')
 
@@ -202,7 +202,7 @@
                 </div>
             </div>
             <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <form action="{{ route(Auth::user()->user_type . '.profile.photo.remove') }}" method="POST" class="sm:ml-3">
+                <form action="{{ route('profile.photo.remove') }}" method="POST" class="sm:ml-3">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">

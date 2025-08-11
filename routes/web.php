@@ -43,7 +43,7 @@ Route::middleware(['auth', 'role:tenant'])->prefix('tenant')->name('tenant.')->g
 
     // Profile Management for Tenants
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
-    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');  
     Route::delete('/profile/photo', [ProfileController::class, 'removePhoto'])->name('profile.photo.remove');
     
     // Settings Routes for Tenants

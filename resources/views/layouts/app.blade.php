@@ -109,9 +109,9 @@
                         </a>
                     @endif
                     
-                    <a href="{{ route('landlord.profile.show') }}" 
+                    <a href="{{ Auth::user()->user_type === 'landlord' ? route('landlord.profile.show') : route('tenant.profile.show') }}" 
                     class="flex items-center p-3 text-gray-600 rounded-3xl transition-colors duration-200
-                            {{ request()->routeIs('profile.*') ? 'bg-gray-600 text-white' : 'hover:bg-gray-600 hover:text-white' }}">
+                            {{ (request()->routeIs('landlord.profile.*') || request()->routeIs('tenant.profile.*')) ? 'bg-gray-600 text-white' : 'hover:bg-gray-600 hover:text-white' }}">
                         <div class="sidebar-icon rounded-lg p-1.5 mr-3">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -145,7 +145,7 @@
             <!-- User Profile -->
             <div class="absolute bottom-6 left-6 right-6">
                 <div class="flex items-center justify-between">
-                    <a href="{{ route('landlord.profile.show') }}" class="flex items-center">
+                    <a href="{{ Auth::user()->user_type === 'landlord' ? route('landlord.profile.show') : route('tenant.profile.show') }}" class="flex items-center">
                         <img src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" class="w-10 h-10 rounded-full mr-3">
                         <div>
                             <span class="text-gray-700 font-semibold text-sm block">{{ Auth::user()->name }}</span>
