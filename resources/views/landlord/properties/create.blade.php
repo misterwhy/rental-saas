@@ -9,7 +9,7 @@
                     <h1 class="text-2xl font-semibold text-gray-900">Add New Property</h1>
                     <p class="text-gray-500 text-sm mt-1">Create a new property listing</p>
                 </div>
-                <a href="{{ route('properties.index') }}"
+                <a href="{{ route('landlord.properties.index') }}"
                    class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-lg font-medium transition-colors duration-200">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -20,7 +20,7 @@
         </div>
 
         <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-            <form method="POST" action="{{ route('properties.store') }}" enctype="multipart/form-data" class="space-y-6">
+            <form method="POST" action="{{ route('landlord.properties.store') }}" enctype="multipart/form-data" class="space-y-6">
                 @csrf
 
                 <!-- Basic Information -->
@@ -149,16 +149,7 @@
                         <div class="md:col-span-2">
                             <fieldset class="border border-gray-300 rounded-lg p-4">
                                 <legend class="text-sm font-medium text-gray-700 px-2">Assign Tenant (Optional)</legend>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                                    <div>
-                                        <label for="tenant_name" class="block text-sm font-medium text-gray-700 mb-1">Tenant Name</label>
-                                        <input type="text" id="tenant_name" name="tenant_name" value="{{ old('tenant_name') }}"
-                                            placeholder="John Doe"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('tenant_name') border-red-500 @enderror">
-                                        @error('tenant_name')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
-                                    </div>
+                                <div class="grid grid-cols-1 gap-4 mt-2">
                                     <div>
                                         <label for="tenant_email" class="block text-sm font-medium text-gray-700 mb-1">Tenant Email</label>
                                         <input type="email" id="tenant_email" name="tenant_email" value="{{ old('tenant_email') }}"
@@ -167,14 +158,9 @@
                                         @error('tenant_email')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
-                                        <p class="mt-1 text-xs text-gray-500">If the email doesn't exist, a new tenant account will be created.</p>
+                                        <p class="mt-1 text-xs text-gray-500">Enter the email of an existing tenant to assign them to this property.</p>
                                     </div>
                                 </div>
-                                @if(session('tenant_temp_info')) {{-- Example for displaying temp password (NOT SECURE) --}}
-                                    <div class="mt-3 p-3 bg-yellow-100 text-yellow-800 text-sm rounded-md">
-                                        {{ session('tenant_temp_info') }}
-                                    </div>
-                                @endif
                             </fieldset>
                         </div>
 
@@ -251,7 +237,7 @@
 
                 <!-- Form Actions -->
                 <div class="px-6 py-4 bg-gray-50 flex justify-end space-x-4">
-                    <a href="{{ route('properties.index') }}"
+                    <a href="{{ route('landlord.properties.index') }}"
                        class="px-6 py-3 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-lg font-medium transition-colors duration-200">
                         Cancel
                     </a>

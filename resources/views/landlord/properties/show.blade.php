@@ -5,7 +5,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Back Button -->
         <div class="mb-6">
-            <a href="{{ route('properties.index') }}" 
+            <a href="{{ route('landlord.properties.index') }}" 
                class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-200">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -174,29 +174,22 @@
                         <div class="px-6 py-4 border-b border-gray-200">
                             <h2 class="text-xl font-semibold text-gray-900">Current Tenant</h2>
                         </div>
-                        <div class="p-6">
-                            <div class="flex items-center">
-                                <div class="flex-shrink-0">
-                                    <div class="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16" />
-                                </div>
-                                <div class="ml-4">
-                                    <h3 class="text-lg font-medium text-gray-900">{{ $property->tenant->name }}</h3>
-                                    <p class="text-gray-500">{{ $property->tenant->email }}</p>
-                                    @if($property->tenant->phone)
-                                        <p class="text-gray-500 mt-1">{{ $property->tenant->phone }}</p>
-                                    @endif
-                                </div>
+                    <div class="p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <img src="{{ $property->tenant->profile_photo_url }}" 
+                                    alt="{{ $property->tenant->name }}" 
+                                    class="w-16 h-16 rounded-xl object-cover border-2 border-gray-200">
                             </div>
-                            <div class="mt-4 pt-4 border-t border-gray-200">
-                                <a href="{{ route('rent-payments.index') }}?property_id={{ $property->id }}" 
-                                class="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg font-medium transition-colors duration-200">
-                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    View Rent Payments
-                                </a>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-medium text-gray-900">{{ $property->tenant->name }}</h3>
+                                <p class="text-gray-500">{{ $property->tenant->email }}</p>
+                                @if($property->tenant->phone)
+                                    <p class="text-gray-500 mt-1">{{ $property->tenant->phone }}</p>
+                                @endif
                             </div>
                         </div>
+                    </div>
                     </div>
                 @endif
 
@@ -276,8 +269,9 @@
                         <div class="px-6 py-4 border-b border-gray-200">
                             <h2 class="text-xl font-semibold text-gray-900">Quick Actions</h2>
                         </div>
+                        
                         <div class="p-6 space-y-3">
-                            <a href="{{ route('properties.edit', $property) }}" 
+                            <a href="{{ route('landlord.properties.edit', $property) }}" 
                                class="w-full inline-flex items-center justify-center px-4 py-3 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg font-medium transition-colors duration-200">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -285,13 +279,25 @@
                                 Edit Details
                             </a>
                             
-                            <a href="{{ route('rent-payments.index') }}?property_id={{ $property->id }}" 
+                            <a href="{{ route('landlord.rent-payments.index') }}?property_id={{ $property->id }}" 
                                class="w-full inline-flex items-center justify-center px-4 py-3 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg font-medium transition-colors duration-200">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                                 Manage Payments
                             </a>
+
+                            <!-- Look for this Assign Tenant button -->
+                            @if(!$property->tenant_id)
+                                <a href="{{ route('landlord.properties.assign-tenant', $property) }}" 
+                                onclick="document.getElementById('assign-tenant-modal').classList.remove('hidden')"
+                                class="w-full inline-flex items-center justify-center px-4 py-3 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg font-medium transition-colors duration-200">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                                    </svg>
+                                    Assign Tenant
+                                </a>
+                            @endif
                             
                             <button type="button" 
                                     onclick="showDeleteModal({{ $property->id }})"
@@ -314,7 +320,7 @@
 <div id="delete-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto z-50">
     <div class="flex items-center justify-center min-h-screen">
         <div class="bg-white rounded-lg shadow-xl transform transition-all sm:max-w-lg w-full mx-4">
-            <form method="POST" action="{{ route('properties.destroy', $property) }}">
+            <form method="POST" action="{{ route('landlord.properties.destroy', $property) }}">
                 @csrf
                 @method('DELETE')
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">

@@ -5,8 +5,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Property; // Ensure this is the correct path to your Property model
-use App\Models\MaintenanceRequest; // Ensure this is the correct path
+use App\Models\Property;
+use App\Models\MaintenanceRequest;
+use App\Models\Lease;
+use App\Models\RentPayment;
+use App\Models\Notification;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -14,59 +19,104 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        // --- Fetch User's Properties ---
-        // Eager load relationships if needed for other parts of the view
-        $properties = $user->properties; // This uses the relationship defined in your User model
+        // Redirect based on user type
+        if ($user->role === 'landlord') {
+            return $this->landlordDashboard();
+        } elseif ($user->role === 'tenant') {
+            return $this->tenantDashboard();
+        }
 
-        // --- Calculate Real Dashboard Metrics ---
+        // Fallback: redirect to home if role is unknown
+        return redirect()->route('home');
+    }
+
+    public function landlordDashboard()
+    {
+        $user = Auth::user();
+        
+        // Your existing landlord dashboard code
+        $properties = $user->properties;
         $totalProperties = $properties->count();
         $totalUnits = $properties->sum('number_of_units');
-        // Assuming a realistic total value calculation, perhaps total purchase price or a derived value
-        // For now, let's use the sum of purchase prices as an example "value" metric.
-        $totalPortfolioValue = $properties->sum('purchase_price'); // Handles nulls as 0
+        $totalPortfolioValue = $properties->sum('purchase_price');
 
-        // --- Calculate Data for the Bar Chart (Property Value by Type) ---
-        // Group properties by type, sum their purchase prices, and prepare data for the chart
         $propertyValueByType = $user->properties()
-            ->select('property_type', \DB::raw('SUM(purchase_price) as total_value'), \DB::raw('COUNT(*) as count'))
+            ->select('property_type', DB::raw('SUM(purchase_price) as total_value'), DB::raw('COUNT(*) as count'))
             ->groupBy('property_type')
             ->get();
 
         $chartLabels = $propertyValueByType->pluck('property_type')->toArray();
-        // Format values for display (e.g., in thousands) if needed, or pass raw values
-        // Chart.js can handle formatting in the tooltip callback.
         $chartValues = $propertyValueByType->pluck('total_value')->map(fn($value) => $value ?? 0)->toArray();
-        // Optional: Pass counts if needed for tooltips or other logic
         $chartCounts = $propertyValueByType->pluck('count')->toArray();
 
-        // --- Calculate Data for the Doughnut Chart (Property Count by Type) ---
         $propertyCountByType = $user->properties()
-            ->select('property_type', \DB::raw('COUNT(*) as count'))
+            ->select('property_type', DB::raw('COUNT(*) as count'))
             ->groupBy('property_type')
             ->get();
 
         $doughnutLabels = $propertyCountByType->pluck('property_type')->toArray();
         $doughnutValues = $propertyCountByType->pluck('count')->toArray();
 
-        // --- Calculate Maintenance Requests Count ---
-        // Adjust this query based on your MaintenanceRequest model structure
-        // E.g., if it belongsTo Property, and Property belongsTo User (owner)
         $totalMaintenanceRequests = MaintenanceRequest::whereIn('property_id', $user->properties->pluck('id'))->count();
-        // Or, if requests are directly linked to the user in some way:
-        // $totalMaintenanceRequests = $user->maintenanceRequests()->count(); // If you have this relationship
 
-        // Pass all calculated data to the view
-        return view('dashboard.landlord', compact(
+        // Get notifications for landlord
+        $notifications = $user->notifications()->latest()->limit(5)->get();
+        $unreadNotificationsCount = $user->unreadNotifications()->count();
+
+        return view('landlord.dashboard', compact(
             'totalProperties',
             'totalUnits',
             'totalPortfolioValue',
             'chartLabels',
             'chartValues',
-            'chartCounts', // Optional
+            'chartCounts',
             'doughnutLabels',
             'doughnutValues',
-            'totalMaintenanceRequests'
-            // Add other data needed for "Recent Properties" or "Last Transactions" sections if updated
+            'totalMaintenanceRequests',
+            'notifications',
+            'unreadNotificationsCount'
+        ));
+    }
+
+    public function tenantDashboard()
+    {
+        $user = Auth::user();
+        
+        // Get tenant's active lease
+        $activeLease = Lease::where('tenant_id', $user->id)
+            ->where('status', 'active')
+            ->first();
+        
+        // Get upcoming payment
+        $upcomingPayment = RentPayment::where('tenant_id', $user->id)
+            ->where('status', 'pending')
+            ->orderBy('due_date')
+            ->first();
+        
+        // Get recent payments
+        $recentPayments = RentPayment::where('tenant_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+        
+        // Get maintenance requests
+        $maintenanceRequests = MaintenanceRequest::where('tenant_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        // Get notifications for tenant
+        $notifications = $user->notifications()->latest()->limit(5)->get();
+        $unreadNotificationsCount = $user->unreadNotifications()->count();
+
+        // Pass tenant-specific data to the tenant dashboard view
+        return view('tenant.dashboard', compact(
+            'activeLease',
+            'upcomingPayment',
+            'recentPayments',
+            'maintenanceRequests',
+            'notifications',
+            'unreadNotificationsCount'
         ));
     }
 }

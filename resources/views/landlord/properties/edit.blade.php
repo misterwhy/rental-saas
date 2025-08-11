@@ -6,7 +6,7 @@
             <h1 class="text-2xl font-semibold text-gray-900">Edit Property</h1>
             <p class="text-gray-500 text-sm mt-1">Update your property listing</p>
         </div>
-        <a href="{{ route('properties.show', $property) }}"
+        <a href="{{ route('landlord.properties.show', $property) }}"
            class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-lg font-medium transition-colors duration-200">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -17,7 +17,7 @@
 </div>
 
 <div class="dashboard-card max-w-4xl">
-    <form method="POST" action="{{ route('properties.update', $property) }}" enctype="multipart/form-data" class="space-y-6">
+    <form method="POST" action="{{ route('landlord.properties.update', $property) }}" enctype="multipart/form-data" class="space-y-6">
         @csrf
         @method('PUT')
         
@@ -266,7 +266,7 @@
 
         <!-- Form Actions -->
         <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
-            <a href="{{ route('properties.show', $property) }}"
+            <a href="{{ route('landlord.properties.show', $property) }}"
                class="px-6 py-3 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-lg font-medium transition-colors duration-200">
                 Cancel
             </a>

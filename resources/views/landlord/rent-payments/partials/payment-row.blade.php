@@ -38,7 +38,7 @@
                 Mark Paid
             </button>
         @endif
-        <a href="{{ route('rent-payments.show', $payment) }}" class="text-blue-600 hover:text-blue-900">
+        <a href="{{ route('landlord.rent-payments.show', $payment) }}" class="text-blue-600 hover:text-blue-900">
             View
         </a>
     </td>

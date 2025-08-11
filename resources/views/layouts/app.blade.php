@@ -31,9 +31,9 @@
                 <!-- Navigation -->
                 <nav class="space-y-1">
                     @if(Auth::user()->user_type === 'landlord')
-                        <a href="{{ route('dashboard') }}" 
+                        <a href="{{ route('landlord.dashboard') }}" 
                         class="flex items-center p-3 text-gray-600 rounded-3xl transition-colors duration-200
-                                {{ request()->is('dashboard') ? 'bg-gray-600 text-white' : 'hover:bg-gray-600 hover:text-white' }}">
+                                {{ request()->routeIs('landlord.dashboard') ? 'bg-gray-600 text-white' : 'hover:bg-gray-600 hover:text-white' }}">
                             <div class="sidebar-icon rounded-lg p-1.5 mr-3">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
@@ -42,9 +42,9 @@
                             <span class="text-sm font-medium">Dashboard</span>
                         </a>
                         
-                        <a href="{{ route('properties.index') }}" 
+                        <a href="{{ route('landlord.properties.index') }}" 
                         class="flex items-center p-3 text-gray-600 rounded-3xl transition-colors duration-200
-                                {{ request()->routeIs('properties.*') ? 'bg-gray-600 text-white' : 'hover:bg-gray-600 hover:text-white' }}">
+                                {{ request()->routeIs('landlord.properties.*') ? 'bg-gray-600 text-white' : 'hover:bg-gray-600 hover:text-white' }}">
                             <div class="sidebar-icon rounded-lg p-1.5 mr-3">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
@@ -53,9 +53,9 @@
                             <span class="text-sm font-medium">Properties</span>
                         </a>
                         
-                        <a href="{{ route('rent-payments.index') }}"
+                        <a href="{{ route('landlord.rent-payments.index') }}"
                         class="flex items-center p-3 text-gray-600 rounded-3xl transition-colors duration-200
-                                {{ request()->routeIs('rent-payments.*') ? 'bg-gray-600 text-white' : 'hover:bg-gray-600 hover:text-white' }}">
+                                {{ request()->routeIs('landlord.rent-payments.*') ? 'bg-gray-600 text-white' : 'hover:bg-gray-600 hover:text-white' }}">
                             <div class="sidebar-icon rounded-lg p-1.5 mr-3">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -64,9 +64,9 @@
                             <span class="text-sm font-medium">Rent Payments</span>
                         </a>
                         
-                        <a href="{{ route('analytics.index') }}"
+                        <a href="{{ route('landlord.analytics.index') }}"
                         class="flex items-center p-3 text-gray-600 rounded-3xl transition-colors duration-200
-                                {{ request()->routeIs('analytics.index') ? 'bg-gray-600 text-white' : 'hover:bg-gray-600 hover:text-white' }}">
+                                {{ request()->routeIs('landlord.analytics.index') ? 'bg-gray-600 text-white' : 'hover:bg-gray-600 hover:text-white' }}">
                             <div class="sidebar-icon rounded-lg p-1.5 mr-3">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0h6m-6 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
@@ -77,7 +77,7 @@
                     @elseif(Auth::user()->user_type === 'tenant')
                         <a href="{{ route('tenant.dashboard') }}" 
                         class="flex items-center p-3 text-gray-600 rounded-3xl transition-colors duration-200
-                                {{ request()->is('tenant/dashboard') ? 'bg-gray-600 text-white' : 'hover:bg-gray-600 hover:text-white' }}">
+                                {{ request()->routeIs('tenant.dashboard') ? 'bg-gray-600 text-white' : 'hover:bg-gray-600 hover:text-white' }}">
                             <div class="sidebar-icon rounded-lg p-1.5 mr-3">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
@@ -86,9 +86,9 @@
                             <span class="text-sm font-medium">My Dashboard</span>
                         </a>
                         
-                        <a href="{{ route('tenant.property') }}"
+                        <a href="{{ route('tenant.properties.index') }}"
                         class="flex items-center p-3 text-gray-600 rounded-3xl transition-colors duration-200
-                                {{ request()->is('tenant/property') ? 'bg-gray-600 text-white' : 'hover:bg-gray-600 hover:text-white' }}">
+                                {{ request()->routeIs('tenant.properties.*') ? 'bg-gray-600 text-white' : 'hover:bg-gray-600 hover:text-white' }}">
                             <div class="sidebar-icon rounded-lg p-1.5 mr-3">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
@@ -97,9 +97,9 @@
                             <span class="text-sm font-medium">My Property</span>
                         </a>
                         
-                        <a href="{{ route('rent-payments.index') }}"
+                        <a href="{{ route('tenant.rent-payments.index') }}" 
                         class="flex items-center p-3 text-gray-600 rounded-3xl transition-colors duration-200
-                                {{ request()->routeIs('rent-payments.*') ? 'bg-gray-600 text-white' : 'hover:bg-gray-600 hover:text-white' }}">
+                                {{ request()->routeIs('tenant.payments.*') ? 'bg-gray-600 text-white' : 'hover:bg-gray-600 hover:text-white' }}">
                             <div class="sidebar-icon rounded-lg p-1.5 mr-3">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -109,7 +109,7 @@
                         </a>
                     @endif
                     
-                    <a href="{{ route('profile.show') }}" 
+                    <a href="{{ route('landlord.profile.show') }}" 
                     class="flex items-center p-3 text-gray-600 rounded-3xl transition-colors duration-200
                             {{ request()->routeIs('profile.*') ? 'bg-gray-600 text-white' : 'hover:bg-gray-600 hover:text-white' }}">
                         <div class="sidebar-icon rounded-lg p-1.5 mr-3">
@@ -120,7 +120,8 @@
                         <span class="text-sm font-medium">Profile</span>
                     </a>
                     
-                    <a href="#" class="flex items-center p-3 text-gray-600 hover:bg-gray-600 hover:text-white rounded-3xl transition-colors duration-200">
+                    <a href="{{ Auth::user()->role === 'landlord' ? route('landlord.settings.index') : route('tenant.settings.index') }}" 
+                    class="flex items-center p-3 text-gray-600 hover:bg-gray-600 hover:text-white rounded-3xl transition-colors duration-200">
                         <div class="sidebar-icon rounded-lg p-1.5 mr-3 hover:text-white">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
@@ -144,7 +145,7 @@
             <!-- User Profile -->
             <div class="absolute bottom-6 left-6 right-6">
                 <div class="flex items-center justify-between">
-                    <a href="{{ route('profile.show') }}" class="flex items-center">
+                    <a href="{{ route('landlord.profile.show') }}" class="flex items-center">
                         <img src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" class="w-10 h-10 rounded-full mr-3">
                         <div>
                             <span class="text-gray-700 font-semibold text-sm block">{{ Auth::user()->name }}</span>
@@ -182,12 +183,78 @@
                             </div>
                         </div>
 
-                        <button class="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-200 relative">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                            </svg>
-                            <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400"></span>
-                        </button>
+
+
+
+            <div class="relative">
+                <button id="notification-button" class="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-200 relative">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                    </svg>
+                    @if(isset($unreadNotificationsCount) && $unreadNotificationsCount > 0)
+                        <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400"></span>
+                    @endif
+                </button>
+                <!-- Notification Dropdown -->
+                <div id="notification-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    <div class="p-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Notifications</h3>
+                    </div>
+                    <div class="max-h-96 overflow-y-auto">
+                        @forelse($notifications as $notification)
+                            <a href="{{ $notification->link ?? '#' }}" class="block p-4 border-b border-gray-100 hover:bg-gray-50">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <div class="w-8 h-8 rounded-full {{ $notification->type_class }} flex items-center justify-center">
+                                            {!! $notification->icon !!}
+                                        </div>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-900">{{ $notification->title }}</p>
+                                        <p class="text-sm text-gray-500">{{ $notification->message }}</p>
+                                        <p class="text-xs text-gray-400 mt-1">{{ $notification->created_at->diffForHumans() }}</p>
+                                    </div>
+                                </div>
+                            </a>
+                        @empty
+                            <div class="p-4 text-center text-gray-500">
+                                <svg class="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                </svg>
+                                <p class="mt-2">No notifications</p>
+                            </div>
+                        @endforelse
+                    </div>
+                    @if($notifications->count() > 0)
+                        <div class="p-2 border-t border-gray-200 text-center">
+                            <a href="{{ route('notifications.index') }}" class="text-sm text-blue-600 hover:text-blue-800">View all notifications</a>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const notificationButton = document.getElementById('notification-button');
+                    const notificationDropdown = document.getElementById('notification-dropdown');
+                    
+                    notificationButton.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        notificationDropdown.classList.toggle('hidden');
+                    });
+                    
+                    // Close dropdown when clicking outside
+                    document.addEventListener('click', function(e) {
+                        if (!notificationButton.contains(e.target) && !notificationDropdown.contains(e.target)) {
+                            notificationDropdown.classList.add('hidden');
+                        }
+                    });
+                });
+            </script>
+
+
+
+
                     </div>
                 </div>
             </div>

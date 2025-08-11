@@ -12,54 +12,85 @@ class AnalyticsController extends Controller
 {
     public function index()
     {
-        $user = Auth::user();
-
-        // Fetch user's properties with necessary relationships if needed later
-        $properties = $user->properties; // Uses the relationship defined in User model
-
-        // --- Calculate Analytics Data ---
-
-        // 1. Property Value Distribution by Type (for Bar Chart)
-        $propertyValueByType = $user->properties()
-            ->select('property_type', DB::raw('SUM(purchase_price) as total_value'), DB::raw('COUNT(*) as count'))
+        $user = auth()->user();
+        
+        // Existing metrics
+        $totalProperties = $user->properties->count();
+        $totalUnits = $user->properties->sum('number_of_units');
+        $totalPortfolioValue = $user->properties->sum('purchase_price');
+        
+        // New metrics
+        $totalMonthlyIncome = $user->properties->sum(function ($property) {
+            return $property->leases->where('status', 'active')->sum('monthly_rent');
+        });
+        
+        // Existing chart data
+        $valueByType = $user->properties()
+            ->select('property_type', \DB::raw('SUM(purchase_price) as total_value'), \DB::raw('COUNT(*) as count'))
             ->groupBy('property_type')
             ->get();
-        $valueByTypeLabels = $propertyValueByType->pluck('property_type');
-        $valueByTypeData = $propertyValueByType->pluck('total_value')->map(fn($v) => $v ?? 0);
-
-        // 2. Property Count Distribution by Type (for Doughnut Chart)
-        $propertyCountByType = $user->properties()
-            ->select('property_type', DB::raw('COUNT(*) as count'))
+        
+        $valueByTypeLabels = $valueByType->pluck('property_type')->toArray();
+        $valueByTypeData = $valueByType->pluck('total_value')->map(fn($value) => $value ?? 0)->toArray();
+        
+        $countByType = $user->properties()
+            ->select('property_type', \DB::raw('COUNT(*) as count'))
             ->groupBy('property_type')
             ->get();
-        $countByTypeLabels = $propertyCountByType->pluck('property_type');
-        $countByTypeData = $propertyCountByType->pluck('count');
-
-        // 3. Total Units Distribution by Type (Alternative for Bar Chart)
+        
+        $countByTypeLabels = $countByType->pluck('property_type')->toArray();
+        $countByTypeData = $countByType->pluck('count')->toArray();
+        
         $unitsByType = $user->properties()
-            ->select('property_type', DB::raw('SUM(number_of_units) as total_units'))
+            ->select('property_type', \DB::raw('SUM(number_of_units) as total_units'))
             ->groupBy('property_type')
             ->get();
-        $unitsByTypeLabels = $unitsByType->pluck('property_type');
-        $unitsByTypeData = $unitsByType->pluck('total_units')->map(fn($u) => $u ?? 0);
+        
+        $unitsByTypeLabels = $unitsByType->pluck('property_type')->toArray();
+        $unitsByTypeData = $unitsByType->pluck('total_units')->map(fn($value) => $value ?? 0)->toArray();
+        
+        // New profitability data
+        $topProperties = $user->properties->sortByDesc(function ($property) {
+            return $property->leases->where('status', 'active')->sum('monthly_rent');
+        })->take(5);
+        
+        $topPropertiesLabels = $topProperties->pluck('name')->toArray();
+        $topPropertiesData = $topProperties->map(function ($property) {
+            return $property->leases->where('status', 'active')->sum('monthly_rent');
+        })->toArray();
+        
+        // Properties with financial data
+        $propertiesWithFinancials = $user->properties->map(function ($property) {
+            $monthlyIncome = $property->leases->where('status', 'active')->sum('monthly_rent');
+            $occupiedUnits = $property->leases->where('status', 'active')->count();
+            $occupancyRate = $property->number_of_units > 0 ? 
+                round(($occupiedUnits / $property->number_of_units) * 100) : null;
+            
+            return (object) [
+                'name' => $property->name,
+                'address' => $property->address,
+                'property_type' => $property->property_type,
+                'number_of_units' => $property->number_of_units,
+                'purchase_price' => $property->purchase_price,
+                'monthly_income' => $monthlyIncome,
+                'occupancy_rate' => $occupancyRate
+            ];
+        });
 
-        // 4. Summary Stats
-        $totalProperties = $properties->count();
-        $totalUnits = $properties->sum('number_of_units');
-        $totalPortfolioValue = $properties->sum('purchase_price');
-
-        // Pass data to the view
         return view('analytics.index', compact(
             'totalProperties',
             'totalUnits',
             'totalPortfolioValue',
+            'totalMonthlyIncome',
             'valueByTypeLabels',
             'valueByTypeData',
             'countByTypeLabels',
             'countByTypeData',
             'unitsByTypeLabels',
-            'unitsByTypeData'
-            // Add more data points as needed for other charts/tables
+            'unitsByTypeData',
+            'topPropertiesLabels',
+            'topPropertiesData',
+            'propertiesWithFinancials'
         ));
     }
 }

@@ -92,8 +92,7 @@
         <div class="flex justify-between items-center mb-6">
             {{-- Change chart title --}}
             <h3 class="text-lg font-semibold text-gray-900">Properties by Type</h3>
-            <a href="{{ route('properties.index') }}" class="text-sm text-gray-500 hover:text-gray-700">See All</a>
-        </div>
+            <a href="{{ route('landlord.properties.index') }}" class="text-sm text-gray-500 hover:text-gray-700">See All</a>        </div>
         <div class="flex justify-center mb-6">
             <div class="relative w-40 h-40">
                 <canvas id="costChart" width="160" height="160"></canvas>

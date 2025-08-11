@@ -7,9 +7,15 @@
             <div class="px-6 py-4 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <h2 class="text-xl font-semibold text-gray-800">Payment Details</h2>
-                    <a href="{{ route('rent-payments.index') }}" class="text-blue-600 hover:text-blue-800 text-sm">
-                        ← Back to Payments
-                    </a>
+                    @if(Auth::user()->role === 'landlord')
+                        <a href="{{ route('landlord.rent-payments.index') }}" class="text-blue-600 hover:text-blue-800 text-sm">
+                            ← Back to Payments
+                        </a>
+                    @else
+                        <a href="{{ route('tenant.rent-payments.index') }}" class="text-blue-600 hover:text-blue-800 text-sm">
+                            ← Back to Payments
+                        </a>
+                    @endif
                 </div>
             </div>
 
@@ -39,7 +45,7 @@
                             @endif
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Status:</span>
-                                <span class=" font-medium bg-{{ $rentPayment->status_badge }}-100 text-{{ $rentPayment->status_badge }}-800">
+                                <span class="font-medium bg-{{ $rentPayment->status_badge }}-100 text-{{ $rentPayment->status_badge }}-800 px-2 py-1 rounded-full text-xs">
                                     {{ ucfirst($rentPayment->status) }}
                                 </span>
                             </div>
@@ -65,7 +71,7 @@
                                 </span>
                             </div>
                             
-                            @if(Auth::user()->isLandlord())
+                            @if(Auth::user()->role === 'landlord')
                                 <div>
                                     <span class="text-gray-600 block text-sm">Tenant:</span>
                                     <span class="font-medium">{{ $rentPayment->tenant->name ?? 'Unknown Tenant' }}</span>
@@ -93,8 +99,6 @@
                     </div>
                 @endif
 
-
-
                 <!-- Actions -->
                 <div class="mt-8 pt-6 border-t border-gray-200">
                     <div class="flex justify-between items-center">
@@ -107,22 +111,22 @@
                         
                         <div class="flex space-x-3">
                             <!-- Back to List button -->
-                            <a href="{{ route('rent-payments.index') }}" 
-                            class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                                Back to List
-                            </a>
-                            
-                            <!-- PDF Download button -->
-                            <a href="{{ route('rent-payments.pdf', $rentPayment) }}" 
-                            target="_blank"
-                            class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
-                                </svg>
-                                Download PDF
-                            </a>
-                            
-                            @if(Auth::user()->isLandlord())
+                            @if(Auth::user()->role === 'landlord')
+                                <a href="{{ route('landlord.rent-payments.index') }}" 
+                                class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                    Back to List
+                                </a>
+                                
+                                <!-- PDF Download button -->
+                                <a href="{{ route('landlord.rent-payments.pdf', $rentPayment) }}" 
+                                target="_blank"
+                                class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                                    </svg>
+                                    Download PDF
+                                </a>
+                                
                                 @if($rentPayment->status === 'pending')
                                     <button type="button" 
                                             onclick="showMarkPaidModal({{ $rentPayment->id }})"
@@ -137,28 +141,32 @@
                                         Delete Payment
                                     </button>
                                 @endif
+                            @else
+                                <a href="{{ route('tenant.rent-payments.index') }}" 
+                                class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                    Back to List
+                                </a>
                                 
+                                <!-- PDF Download button -->
+                                <a href="{{ route('tenant.rent-payments.pdf', $rentPayment) }}" 
+                                target="_blank"
+                                class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                                    </svg>
+                                    Download PDF
+                                </a>
                             @endif
                         </div>
                     </div>
                 </div>
-
-                
-
-
-
-
-
-
-
-
-
             </div>
         </div>
     </div>
 </div>
 
 <!-- Mark Paid Modal -->
+@if(Auth::user()->role === 'landlord')
 <div id="mark-paid-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto z-50">
     <div class="flex items-center justify-center min-h-screen">
         <div class="bg-white rounded-lg shadow-xl transform transition-all sm:max-w-lg w-full">
@@ -205,7 +213,6 @@
 </div>
 
 <!-- Delete Payment Modal -->
-@if(Auth::user()->isLandlord())
 <div id="delete-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto z-50">
     <div class="flex items-center justify-center min-h-screen">
         <div class="bg-white rounded-lg shadow-xl transform transition-all sm:max-w-lg w-full">
@@ -243,14 +250,14 @@
 </div>
 @endif
 
-
-
 <script>
 // Mark payment as paid (SIMPLE VERSION - NO AJAX)
 function showMarkPaidModal(paymentId) {
-    const form = document.getElementById('mark-paid-form');
-    form.action = `/rent-payments/${paymentId}/mark-paid`;
-    document.getElementById('mark-paid-modal').classList.remove('hidden');
+    @if(Auth::user()->role === 'landlord')
+        const form = document.getElementById('mark-paid-form');
+        form.action = `/landlord/rent-payments/${paymentId}/mark-paid`;
+        document.getElementById('mark-paid-modal').classList.remove('hidden');
+    @endif
 }
 
 function hideMarkPaidModal() {
@@ -259,21 +266,14 @@ function hideMarkPaidModal() {
 
 // Delete payment (SIMPLE VERSION - NO AJAX)
 function showDeleteModal(paymentId) {
-    document.getElementById('delete-form').action = `/rent-payments/${paymentId}`;
-    document.getElementById('delete-modal').classList.remove('hidden');
+    @if(Auth::user()->role === 'landlord')
+        document.getElementById('delete-form').action = `/landlord/rent-payments/${paymentId}`;
+        document.getElementById('delete-modal').classList.remove('hidden');
+    @endif
 }
 
 function hideDeleteModal() {
     document.getElementById('delete-modal').classList.add('hidden');
-}
-
-// Clear filters
-function clearFilters() {
-    document.querySelector('input[name="search"]').value = '';
-    document.querySelector('select[name="status"]').value = '';
-    document.querySelector('select[name="property_id"]').value = '';
-    document.querySelector('input[name="month"]').value = '';
-    document.getElementById('search-form').submit();
 }
 
 // Close modals when clicking outside or pressing Escape

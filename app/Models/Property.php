@@ -12,6 +12,7 @@ class Property extends Model
 
     protected $fillable = [
         'owner_id',
+        'tenant_id',
         'name',
         'address',
         'city',
@@ -39,6 +40,11 @@ class Property extends Model
         return $this->belongsTo(User::class, 'owner_id');
     }
 
+    public function tenant()
+    {
+        return $this->belongsTo(User::class, 'tenant_id');
+    }
+
     public function units()
     {
         return $this->hasMany(Unit::class);
@@ -53,9 +59,29 @@ class Property extends Model
     {
         return $this->hasMany(Image::class);
     }
-    public function tenant()
+
+    /**
+     * Get all leases for this property
+     */
+    public function leases()
     {
-        return $this->belongsTo(User::class, 'tenant_id');
+        return $this->hasMany(Lease::class);
+    }
+
+    /**
+     * Get active leases for this property
+     */
+    public function activeLeases()
+    {
+        return $this->leases()->where('status', 'active');
+    }
+
+    /**
+     * Get rent payments for this property
+     */
+    public function rentPayments()
+    {
+        return $this->hasMany(RentPayment::class);
     }
 
     /**
@@ -65,6 +91,7 @@ class Property extends Model
     {
         return $this->hasOne(Image::class)->where('is_main', 1);
     }
+    
     public function getMainImageAttribute()
     {
         return $this->images()->where('is_main', 1)->first();

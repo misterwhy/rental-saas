@@ -99,10 +99,25 @@ class RentPaymentController extends Controller
             // Get properties for filter dropdown
             $properties = Property::where('owner_id', $user->id)->get();
             
+            return view('landlord.rent-payments.index', compact(
+                'payments', 
+                'totalReceived', 
+                'totalPending', 
+                'overdueCount', 
+                'totalPaid',
+                'properties',
+                'search',
+                'status',
+                'propertyId',
+                'month'
+            ));
+            
         } else {
             // Build query for tenants
             $query = RentPayment::with(['property'])
-                ->where('tenant_id', $user->id);
+                ->whereHas('property', function ($query) use ($user) {
+                    $query->where('tenant_id', $user->id);
+                });
             
             // Apply search filters
             if ($search) {
@@ -127,7 +142,9 @@ class RentPaymentController extends Controller
             $payments = $query->latest()->paginate(20)->appends($request->except('page'));
             
             // Get payment statistics for tenants
-            $statsQuery = RentPayment::where('tenant_id', $user->id);
+            $statsQuery = RentPayment::whereHas('property', function ($query) use ($user) {
+                $query->where('tenant_id', $user->id);
+            });
             
             if ($search) {
                 $statsQuery->whereHas('property', function($qp) use ($search) {
@@ -154,20 +171,20 @@ class RentPaymentController extends Controller
             
             // Tenants don't need property filter dropdown
             $properties = collect();
+            
+            return view('tenant.payments.index', compact(
+                'payments', 
+                'totalReceived', 
+                'totalPending', 
+                'overdueCount', 
+                'totalPaid',
+                'properties',
+                'search',
+                'status',
+                'propertyId',
+                'month'
+            ));
         }
-
-        return view('rent-payments.index', compact(
-            'payments', 
-            'totalReceived', 
-            'totalPending', 
-            'overdueCount', 
-            'totalPaid',
-            'properties',
-            'search',
-            'status',
-            'propertyId',
-            'month'
-        ));
     }
 
     /**
@@ -182,9 +199,9 @@ class RentPaymentController extends Controller
         }
         
         $properties = Property::where('owner_id', $user->id)->get();
-        $tenants = User::where('user_type', 'tenant')->get();
+        $tenants = User::where('role', 'tenant')->get();
         
-        return view('rent-payments.create', compact('properties', 'tenants'));
+        return view('landlord.rent-payments.create', compact('properties', 'tenants'));
     }
 
     /**
@@ -206,25 +223,30 @@ class RentPaymentController extends Controller
             'notes' => 'nullable|string|max:1000',
         ]);
         
-        // Verify property belongs to user and get the purchase_price
+        // Verify property belongs to user
         $property = Property::where('id', $request->property_id)
             ->where('owner_id', $user->id)
             ->firstOrFail();
         
-        // Use purchase_price as the rent amount
-        $amount = $property->purchase_price > 0;
+        // Use purchase_price as the rent amount (or set a default)
+        $amount = $property->purchase_price > 0 ? $property->purchase_price : 1000;
         
         $payment = RentPayment::create([
             'property_id' => $request->property_id,
             'tenant_id' => $request->tenant_id,
-            'amount' => $amount, // Use purchase_price as rent amount
+            'amount' => $amount,
             'due_date' => $request->due_date,
             'payment_method' => $request->payment_method,
             'status' => 'pending',
             'notes' => $request->notes,
         ]);
 
-        return redirect()->route('rent-payments.index')->with('success', 'Rent payment created successfully!');
+        // Redirect based on user role
+        if ($user->isLandlord()) {
+            return redirect()->route('landlord.rent-payments.index')->with('success', 'Rent payment created successfully!');
+        } else {
+            return redirect()->route('tenant.rent-payments.index')->with('success', 'Rent payment created successfully!');
+        }
     }
 
     /**
@@ -239,13 +261,13 @@ class RentPaymentController extends Controller
             if ($rentPayment->property->owner_id !== $user->id) {
                 abort(403);
             }
+            return view('landlord.rent-payments.show', compact('rentPayment'));
         } else {
-            if ($rentPayment->tenant_id !== $user->id) {
+            if ($rentPayment->property->tenant_id !== $user->id) {
                 abort(403);
             }
+            return view('tenant.payments.show', compact('rentPayment'));
         }
-        
-        return view('rent-payments.show', compact('rentPayment'));
     }
 
     /**
@@ -265,9 +287,9 @@ class RentPaymentController extends Controller
         }
         
         $properties = Property::where('owner_id', $user->id)->get();
-        $tenants = User::where('user_type', 'tenant')->get();
+        $tenants = User::where('role', 'tenant')->get();
         
-        return view('rent-payments.edit', compact('rentPayment', 'properties', 'tenants'));
+        return view('landlord.rent-payments.edit', compact('rentPayment', 'properties', 'tenants'));
     }
 
     /**
@@ -295,25 +317,30 @@ class RentPaymentController extends Controller
             'notes' => 'nullable|string|max:1000',
         ]);
         
-        // Verify property belongs to user and get the purchase_price
+        // Verify property belongs to user
         $property = Property::where('id', $request->property_id)
             ->where('owner_id', $user->id)
             ->firstOrFail();
         
-        // Use purchase_price as the rent amount
+        // Use purchase_price as the rent amount (or set a default)
         $amount = $property->purchase_price > 0 ? $property->purchase_price : 1000;
         
         $rentPayment->update([
             'property_id' => $request->property_id,
             'tenant_id' => $request->tenant_id,
-            'amount' => $amount, // Use purchase_price as rent amount
+            'amount' => $amount,
             'due_date' => $request->due_date,
             'payment_method' => $request->payment_method,
             'status' => $request->status,
             'notes' => $request->notes,
         ]);
 
-        return redirect()->route('rent-payments.index')->with('success', 'Rent payment updated successfully!');
+        // Redirect based on user role
+        if ($user->isLandlord()) {
+            return redirect()->route('landlord.rent-payments.index')->with('success', 'Rent payment updated successfully!');
+        } else {
+            return redirect()->route('tenant.rent-payments.index')->with('success', 'Rent payment updated successfully!');
+        }
     }
 
     /**
@@ -334,20 +361,32 @@ class RentPaymentController extends Controller
         
         $rentPayment->delete();
 
-        return redirect()->route('rent-payments.index')->with('success', 'Rent payment deleted successfully!');
+        // Redirect based on user role
+        if ($user->isLandlord()) {
+            return redirect()->route('landlord.rent-payments.index')->with('success', 'Rent payment deleted successfully!');
+        } else {
+            return redirect()->route('tenant.rent-payments.index')->with('success', 'Rent payment deleted successfully!');
+        }
     }
 
     /**
      * Mark payment as paid
      */
-
     public function markAsPaid(Request $request, RentPayment $rentPayment)
     {
         $user = Auth::user();
         
-        // Only property owner can mark payment as paid
-        if ($rentPayment->property->owner_id !== $user->id) {
-            abort(403);
+        // Allow both landlords and tenants to mark payments as paid
+        if ($user->isLandlord()) {
+            // Only property owner can mark payment as paid
+            if ($rentPayment->property->owner_id !== $user->id) {
+                abort(403);
+            }
+        } else {
+            // Tenants can only mark their own payments as paid
+            if ($rentPayment->tenant_id !== $user->id) {
+                abort(403);
+            }
         }
 
         $rentPayment->update([
@@ -356,10 +395,15 @@ class RentPaymentController extends Controller
             'payment_method' => $request->payment_method ?? 'cash',
         ]);
 
-        return redirect()->back()->with('success', 'Payment marked as paid successfully!');
+        // Redirect based on user role
+        if ($user->isLandlord()) {
+            return redirect()->route('landlord.rent-payments.index')->with('success', 'Payment marked as paid successfully!');
+        } else {
+            return redirect()->route('tenant.rent-payments.index')->with('success', 'Payment marked as paid successfully!');
+        }
     }
 
-
+    
     /**
      * Generate monthly payments for properties
      */
@@ -370,7 +414,7 @@ class RentPaymentController extends Controller
         // Debug: Log the request
         \Log::info('Generate Monthly Payments Request', [
             'user_id' => $user->id,
-            'user_type' => $user->user_type
+            'user_type' => $user->role
         ]);
         
         // Get ALL properties owned by the current user (not just those with tenants)
@@ -445,7 +489,12 @@ class RentPaymentController extends Controller
             'message' => $message
         ]);
 
-        return redirect()->back()->with('success', $message);
+        // Redirect based on user role
+        if ($user->isLandlord()) {
+            return redirect()->route('landlord.rent-payments.index')->with('success', $message);
+        } else {
+            return redirect()->route('tenant.rent-payments.index')->with('success', $message);
+        }
     }
 
     /**
@@ -478,14 +527,16 @@ class RentPaymentController extends Controller
             if ($rentPayment->property->owner_id !== $user->id) {
                 abort(403);
             }
+            // Load the PDF view for landlord
+            $pdf = PDF::loadView('landlord.rent-payments.pdf', compact('rentPayment'));
         } else {
-            if ($rentPayment->tenant_id !== $user->id) {
+            if ($rentPayment->property->tenant_id !== $user->id) {
                 abort(403);
             }
+            // For tenant, we might want to use the same PDF or create a tenant version
+            // For now, using the same PDF view
+            $pdf = PDF::loadView('landlord.rent-payments.pdf', compact('rentPayment'));
         }
-        
-        // Load the PDF view
-        $pdf = PDF::loadView('rent-payments.pdf', compact('rentPayment'));
         
         // Set paper size and orientation
         $pdf->setPaper('A4', 'portrait');
@@ -493,6 +544,4 @@ class RentPaymentController extends Controller
         // Download the PDF
         return $pdf->download("payment-{$rentPayment->id}-receipt.pdf");
     }
-
-
 }

@@ -9,7 +9,7 @@
         </div>
         @auth
             @if(auth()->user()->isLandlord())
-                <a href="{{ route('properties.create') }}"
+                <a href="{{ route('landlord.properties.create') }}"
                    class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -82,26 +82,34 @@
                         </div>
                     </div>
 
-                    <!-- Landlord Info -->
+                    <!-- Tenant Info -->
                     <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                         <div class="flex items-center">
-                            @if($property->owner)
-                                <div class="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-800 text-xs font-semibold mr-2">
-                                    {{ substr($property->owner->name, 0, 1) }}
-                                </div>
-                                <span class="text-xs text-gray-600 truncate">{{ $property->owner->name }}</span>
+                            @if($property->tenant)
+                                @if($property->tenant->profile_photo_url)
+                                    <img src="{{ $property->tenant->profile_photo_url }}" 
+                                        alt="{{ $property->tenant->name }}" 
+                                        class="w-6 h-6 rounded-full object-cover mr-2">
+                                @else
+                                    <div class="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-800 text-xs font-semibold mr-2">
+                                        {{ substr($property->tenant->name, 0, 1) }}
+                                    </div>
+                                @endif
+                                <span class="text-xs text-gray-600 truncate">{{ $property->tenant->name }}</span>
                             @else
                                 <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-800 text-xs font-semibold mr-2">
                                     ?
                                 </div>
-                                <span class="text-xs text-gray-600">Unknown Owner</span>
+                                <span class="text-xs text-gray-600">No Tenant Assigned</span>
                             @endif
                         </div>
-                        <a href="{{ route('properties.show', $property) }}"
-                           class="text-xs font-medium text-emerald-600 hover:text-emerald-800">
+                        <a href="{{ route('landlord.properties.show', $property) }}"
+                        class="text-xs font-medium text-emerald-600 hover:text-emerald-800">
                             View Details
                         </a>
                     </div>
+
+
                 </div>
             </div>
         @endforeach

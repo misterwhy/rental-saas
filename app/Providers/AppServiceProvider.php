@@ -2,27 +2,28 @@
 
 namespace App\Providers;
 
-use App\Models\Property;
-use App\Policies\PropertyPolicy;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\View;
+use App\Models\Notification;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        // Register the policy for Property model
-        Gate::policy(Property::class, PropertyPolicy::class);
+        // Share notifications with all views
+        View::composer('*', function ($view) {
+            if (auth()->check()) {
+                $notifications = auth()->user()->notifications()->latest()->limit(5)->get();
+                $unreadNotificationsCount = auth()->user()->unreadNotifications()->count();
+                $view->with(compact('notifications', 'unreadNotificationsCount'));
+            } else {
+                $view->with('notifications', collect(), 'unreadNotificationsCount', 0);
+            }
+        });
     }
 }

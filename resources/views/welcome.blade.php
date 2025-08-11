@@ -7,115 +7,141 @@
 
     <title>{{ config('app.name', 'House Rental') }}</title>
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,800&display=swap" rel="stylesheet" />
 
-    <!-- Styles -->
     <style>
-        /*! normalize.css v8.0.1 | MIT License | github.com/necolas/normalize.css */
+        /* CSS Variables for easy theming */
+        :root {
+            --color-primary: #4f46e5;
+            --color-primary-dark: #4338ca;
+            --color-text-heading: #111827;
+            --color-text-body: #374151;
+            --color-text-muted: #6b7280;
+            --color-bg-light: #f9fafb;
+            --color-bg-dark: #111827;
+            --color-white: #ffffff;
+            --color-border: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            --border-radius: 0.5rem;
+            --transition-speed: 0.2s;
+        }
+
+        /* Base & Reset */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
         html {
-            line-height: 1.15;
+            line-height: 1.5;
             -webkit-text-size-adjust: 100%;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         body {
             margin: 0;
             font-family: 'Figtree', sans-serif;
-            background-color: #f8fafc; /* slate-50 */
-            color: #1e293b; /* slate-800 */
+            background-color: var(--color-bg-light);
+            color: var(--color-text-body);
+        }
+        main {
+            display: block;
         }
         a {
-            background-color: transparent;
-            color: #4f46e5; /* indigo-600 */
+            color: var(--color-primary);
             text-decoration: none;
+            transition: color var(--transition-speed) ease-in-out;
         }
         a:hover {
-            color: #4338ca; /* indigo-700 */
-            text-decoration: underline;
+            color: var(--color-primary-dark);
         }
-        b, strong {
-            font-weight: bolder;
-        }
-        h1, h2, h3, h4, h5, h6 {
-            font-size: inherit;
-            font-weight: inherit;
-        }
-        button, input, optgroup, select, textarea {
-            font-family: inherit;
-            font-size: 100%;
-            line-height: 1.15;
-            margin: 0;
-            padding: 0;
-            border: 1px solid #cbd5e1; /* slate-300 */
-            border-radius: 0.375rem; /* rounded-md */
-        }
-        button, input:is([type='button'], [type='reset'], [type='submit']) {
-            appearance: button;
-        }
-        button {
-            background-color: #f1f5f9; /* slate-100 */
-            padding: 0.5rem 1rem;
-            font-weight: 500;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #e2e8f0; /* slate-200 */
-        }
+
+        /* Container */
         .container {
             width: 100%;
             margin-right: auto;
             margin-left: auto;
-            padding: 1rem;
+            padding: 0 1.5rem;
         }
-        @media (min-width: 640px) {
-            .container {
-                max-width: 640px;
-            }
-        }
-        @media (min-width: 768px) {
-            .container {
-                max-width: 768px;
-            }
-        }
-        @media (min-width: 1024px) {
-            .container {
-                max-width: 1024px;
-            }
-        }
-        @media (min-width: 1280px) {
-            .container {
-                max-width: 1280px;
-            }
-        }
+        @media (min-width: 640px) { .container { max-width: 640px; } }
+        @media (min-width: 768px) { .container { max-width: 768px; } }
+        @media (min-width: 1024px) { .container { max-width: 1024px; } }
+        @media (min-width: 1280px) { .container { max-width: 1280px; } }
+
+        /* Header */
         .header {
             display: flex;
-            justify-content: flex-end;
-            padding: 1rem;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            background-color: var(--color-white);
+            border-bottom: 1px solid var(--color-border);
+            box-shadow: var(--shadow-sm);
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--color-primary);
         }
         .nav-links {
             display: flex;
-            gap: 1rem;
+            align-items: center;
+            gap: 1.5rem;
         }
+        .nav-links a {
+            font-weight: 500;
+            color: var(--color-text-body);
+            position: relative;
+        }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            transform: scaleX(0);
+            height: 2px;
+            bottom: -4px;
+            left: 0;
+            background-color: var(--color-primary);
+            transform-origin: bottom right;
+            transition: transform var(--transition-speed) ease-out;
+        }
+        .nav-links a:hover::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+        .nav-links a:hover {
+            color: var(--color-primary);
+        }
+
+        /* Hero Section */
         .hero {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 80vh;
+            min-height: 80vh; /* Increased height for better centering */
             text-align: center;
-            padding: 2rem;
+            padding: 3rem 1.5rem; /* Adjusted padding */
+            background-image: linear-gradient(145deg, #eef2ff 0%, #fbfaff 100%);
+        }
+        .hero-content {
+            max-width: 800px; /* Added wrapper for content */
+            width: 100%;
         }
         .hero h1 {
-            font-size: 2.25rem; /* text-4xl */
-            font-weight: 700; /* font-bold */
-            line-height: 1.1; /* tight */
-            margin-bottom: 1rem;
+            font-size: 3rem; /* Slightly reduced font size */
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            color: var(--color-text-heading);
         }
         .hero p {
-            font-size: 1.25rem; /* text-xl */
-            color: #64748b; /* slate-500 */
-            max-width: 36rem;
-            margin-bottom: 2rem;
+            font-size: 1.25rem;
+            color: var(--color-text-muted);
+            max-width: 60ch;
+            margin: 0 auto 2.5rem auto; /* Center the paragraph */
+            line-height: 1.6;
         }
         .cta-buttons {
             display: flex;
@@ -123,125 +149,215 @@
             flex-wrap: wrap;
             justify-content: center;
         }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 0.875rem 2rem;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease-in-out;
+            text-align: center;
+            border: 1px solid transparent;
+        }
         .btn-primary {
-            background-color: #4f46e5; /* indigo-600 */
-            color: white;
-            padding: 0.75rem 1.5rem; /* py-3 px-6 */
-            border-radius: 0.5rem; /* rounded-lg */
-            font-weight: 500; /* font-medium */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+            background-color: var(--color-primary);
+            color: var(--color-white);
+            box-shadow: var(--shadow-md);
         }
         .btn-primary:hover {
-            background-color: #4338ca; /* indigo-700 */
-            text-decoration: none;
+            background-color: var(--color-primary-dark);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-3px);
+            color: var(--color-white);
         }
         .btn-secondary {
-            background-color: white;
-            color: #4f46e5; /* indigo-600 */
-            padding: 0.75rem 1.5rem; /* py-3 px-6 */
-            border: 1px solid #c7d2fe; /* indigo-200 */
-            border-radius: 0.5rem; /* rounded-lg */
-            font-weight: 500; /* font-medium */
+            background-color: var(--color-white);
+            color: var(--color-primary);
+            border-color: var(--color-border);
+            box-shadow: var(--shadow-sm);
         }
         .btn-secondary:hover {
-            background-color: #f1f5f9; /* slate-100 */
-            border-color: #a5b4fc; /* indigo-300 */
+            border-color: var(--color-primary);
+            background-color: #f0f1ff;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
+        
+        /* Features Section */
         .features {
-            padding: 4rem 1rem;
-            background-color: white;
+            padding: 6rem 1rem;
+            background-color: var(--color-white);
+        }
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--color-text-heading);
+            margin-bottom: 1rem;
+        }
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.25rem;
+            color: var(--color-text-muted);
+            max-width: 60ch;
+            margin: 0 auto 4rem auto;
         }
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 2rem;
-            margin-top: 2rem;
         }
         .feature-card {
-            padding: 1.5rem;
-            border-radius: 0.5rem; /* rounded-lg */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
-            transition: transform 0.3s ease;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            background-color: var(--color-bg-light);
+            border: 1px solid var(--color-border);
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
         }
         .feature-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg);
+        }
+        .feature-icon-wrapper {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            border-radius: 0.75rem;
+            background-color: #eef2ff;
+            color: var(--color-primary);
         }
         .feature-card h3 {
-            font-size: 1.25rem; /* text-xl */
-            font-weight: 600; /* font-semibold */
-            margin-bottom: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--color-text-heading);
+            margin: 0 0 0.5rem 0;
         }
+        .feature-card p {
+            color: var(--color-text-muted);
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        /* Footer */
         .footer {
-            background-color: #0f172a; /* slate-900 */
-            color: #cbd5e1; /* slate-300 */
-            padding: 2rem 1rem;
+            background-color: var(--color-bg-dark);
+            color: #9ca3af;
+            padding: 4rem 1rem;
             text-align: center;
+        }
+        .footer p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+        .footer a {
+            color: var(--color-white);
+            font-weight: 500;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .section-title { font-size: 2.25rem; }
         }
         @media (max-width: 640px) {
             .cta-buttons {
                 flex-direction: column;
-                align-items: center;
-            }
-            .btn-primary, .btn-secondary {
+                align-items: stretch;
                 width: 100%;
-                max-width: 200px;
+                max-width: 320px;
+                margin: 0 auto;
             }
+            .hero h1 { font-size: 2rem; }
+            .hero { 
+                padding: 2rem 1rem; 
+                min-height: 70vh;
+            }
+            .features { padding: 4rem 1.5rem; }
+            .header { padding: 1rem 1.5rem; }
+            .logo { font-size: 1.25rem; }
+            .nav-links { gap: 1rem; }
         }
     </style>
 </head>
-<body>
+<body class="antialiased">
     <header class="header">
+        <div class="logo">{{ config('app.name', 'House Rental') }}</div>
         <nav class="nav-links">
-            @auth
-                <a href="{{ route('dashboard') }}">Dashboard</a>
-                <a href="{{ route('properties.index') }}">Properties</a>
-                <a href="{{ route('logout') }}" 
-                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                    Logout
-                </a>
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                    @csrf
-                </form>
+        @auth
+            @if(Auth::user()->role === 'landlord')
+                <a href="{{ route('landlord.dashboard') }}">Dashboard</a>
+                <a href="{{ route('landlord.properties.index') }}">My Properties</a>
+                <a href="{{ route('landlord.rent-payments.index') }}">Rent Payments</a>
+                <a href="{{ route('landlord.profile.show') }}">Profile</a>
             @else
-                <a href="{{ route('login') }}">Login</a>
-                <a href="{{ route('register') }}">Register</a>
-            @endauth
+                <a href="{{ route('tenant.dashboard') }}">Dashboard</a>
+                <a href="{{ route('tenant.properties.index') }}">My Property</a>
+                <a href="{{ route('tenant.rent-payments.index') }}">My Payments</a>
+                <a href="{{ route('tenant.profile.show') }}">Profile</a>
+            @endif
+            
+            <a href="{{ route('logout') }}"
+            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                Logout
+            </a>
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                @csrf
+            </form>
+        @else
+            <a href="{{ route('login') }}">Login</a>
+            <a href="{{ route('register') }}">Register</a>
+        @endauth
         </nav>
     </header>
 
     <main>
         <section class="hero">
-            <h1>House Rental Management System</h1>
-            <p>Efficiently manage your properties, tenants, leases, and payments in one centralized platform.</p>
-            <div class="cta-buttons">
-                @auth
-                    <a href="{{ route('dashboard') }}" class="btn-primary">Go to Dashboard</a>
-                @else
-                    <a href="{{ route('register') }}" class="btn-primary">Get Started</a>
-                    <a href="{{ route('login') }}" class="btn-secondary">Login</a>
-                @endauth
+            <div class="container">
+                    <h1>Find and Manage Your Perfect Rental Home</h1>
+                    <p>Efficiently manage your properties, tenants, leases, and payments in one centralized platform designed for clarity and ease of use.</p>
+                    <div class="cta-buttons">
+                        @auth
+                            <a href="{{ route('dashboard') }}" class="btn btn-primary">Go to Dashboard</a>
+                        @else
+                            <a href="{{ route('register') }}" class="btn btn-primary">Get Started for Free</a>
+                            <a href="{{ route('login') }}" class="btn btn-secondary">Login to Account</a>
+                        @endauth
+                    </div>
+
             </div>
         </section>
 
         <section class="features">
             <div class="container">
-                <h2 style="text-align: center; font-size: 1.875rem; font-weight: 700;">Key Features</h2>
+                <h2 class="section-title">Everything You Need</h2>
+                <p class="section-subtitle">A comprehensive suite of tools to streamline your rental business, from listing to financial reporting.</p>
                 <div class="features-grid">
                     <div class="feature-card">
-                        <h3>PropertyParams Management</h3>
-                        <p>Add, edit, and organize all your rental properties with detailed information and images.</p>
+                        <div class="feature-icon-wrapper">🏠</div>
+                        <h3>Property Management</h3>
+                        <p>Add, edit, and organize all your rental properties with detailed information and beautiful photo galleries.</p>
                     </div>
                     <div class="feature-card">
+                        <div class="feature-icon-wrapper">👥</div>
                         <h3>Tenant Management</h3>
-                        <p>Maintain tenant records, background checks, and communication history.</p>
+                        <p>Maintain complete tenant records, important documents, and a full communication history in one secure place.</p>
                     </div>
                     <div class="feature-card">
+                        <div class="feature-icon-wrapper">📝</div>
                         <h3>Lease Agreements</h3>
-                        <p>Create and manage lease agreements with digital signatures and automated renewals.</p>
+                        <p>Create and manage lease agreements with digital signatures, automated renewals, and deadline tracking.</p>
                     </div>
                     <div class="feature-card">
+                        <div class="feature-icon-wrapper">💳</div>
                         <h3>Payment Tracking</h3>
-                        <p>Monitor rent payments, late fees, and generate financial reports with ease.</p>
+                        <p>Monitor rent payments, automate late fees, and generate insightful financial reports with just a few clicks.</p>
                     </div>
                 </div>
             </div>
@@ -250,7 +366,7 @@
 
     <footer class="footer">
         <div class="container">
-            <p>&copy; {{ date('Y') }} {{ config('app.name', 'House Rental') }}. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} {{ config('app.name', 'House Rental') }}. Built with ❤️ for property managers. All rights reserved.</p>
         </div>
     </footer>
 </body>
